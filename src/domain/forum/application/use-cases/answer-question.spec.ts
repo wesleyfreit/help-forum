@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker';
+import { randomUUID } from 'crypto';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
 import { AnswerQuestionUseCase } from './answer-question';
 
@@ -12,9 +14,9 @@ describe('Answer Question Use Case', () => {
 
   it('should be able to create an answer', async () => {
     const { answer } = await sut.execute({
-      instructorId: '1',
-      questionId: '1',
-      content: 'New answer',
+      instructorId: randomUUID(),
+      questionId: randomUUID(),
+      content: faker.lorem.text(),
     });
 
     expect(answer.id).toBeTruthy();
