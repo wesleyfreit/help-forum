@@ -18,6 +18,12 @@ export class InMemoryQuestionsRepository implements QuestionsRepository {
     this.items.push(question);
   }
 
+  async save(question: Question) {
+    const questionIndex = this.items.findIndex((item) => item.id === question.id);
+
+    this.items[questionIndex] = question;
+  }
+
   async findBySlug(slug: string) {
     const question = this.items.find((question) => question.slug.value === slug);
 
