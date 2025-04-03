@@ -32,6 +32,7 @@ export default [
     },
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
       'prettier/prettier': [
         'error',
         {
@@ -46,36 +47,3 @@ export default [
     },
   },
 ];
-
-// export default [
-//   js.configs.recommended,
-//   js.configs.recommended,
-//   js.configs.all,
-// {
-//   extends: [
-//     "eslint:recommended",
-//     "plugin:@typescript-eslint/recommended",
-//     "plugin:prettier/recommended",
-//     "plugin:vitest-globals/recommended",
-//   ],
-//   ignores: ["**/*.config.*", "**/node_modules/", "**/build/", "**/coverage/"],
-//   languageOptions: {
-//     ecmaVersion: "latest",
-//     parser: tsParser,
-//     sourceType: "module",
-//   },
-//   plugins: {
-//     "@typescript-eslint": typescriptEslint,
-//   },
-//   rules: {
-//     "@typescript-eslint/no-unused-vars": "off",
-//     "prettier/prettier": ["error", {
-//       configFile: ".prettierrc.json",
-//     }],
-//   },
-//   settings: {
-//     "import/parsers": {
-//       "@typescript-eslint/parser": [".ts", ".d.ts"],
-//     },
-//   },
-// }];
