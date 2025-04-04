@@ -3,11 +3,13 @@ import { randomUUID } from 'crypto';
 import { makeAnswer } from 'test/factories/make-answer';
 import { makeQuestion } from 'test/factories/make-question';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
+import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
 import { Answer } from '../../enterprise/entities/answer';
 import { ChooseQuestionBestAnswerUseCase } from './choose-question-best-answer';
 
 let questionsRepository: InMemoryQuestionsRepository;
+let questionAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
 let answersRepository: InMemoryAnswersRepository;
 let sut: ChooseQuestionBestAnswerUseCase;
 
@@ -16,7 +18,8 @@ let newAnswer: Answer;
 
 describe('Choose Question Best Answer Use Case', () => {
   beforeEach(async () => {
-    questionsRepository = new InMemoryQuestionsRepository();
+    questionAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
+    questionsRepository = new InMemoryQuestionsRepository(questionAttachmentsRepository);
     answersRepository = new InMemoryAnswersRepository();
     sut = new ChooseQuestionBestAnswerUseCase(questionsRepository, answersRepository);
 

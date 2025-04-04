@@ -17,8 +17,8 @@ let newQuestion: Question;
 
 describe('Edit Question Use Case', () => {
   beforeEach(async () => {
-    questionsRepository = new InMemoryQuestionsRepository();
     questionAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
+    questionsRepository = new InMemoryQuestionsRepository(questionAttachmentsRepository);
     sut = new EditQuestionUseCase(questionsRepository, questionAttachmentsRepository);
 
     newQuestion = makeQuestion();
