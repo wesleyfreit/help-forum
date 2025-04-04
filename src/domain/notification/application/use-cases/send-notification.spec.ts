@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { InMemoryNotificationsRepository } from 'test/repositories/in-memory-notifications-repository';
 import { SendNotificationUseCase } from './send-notification';
 

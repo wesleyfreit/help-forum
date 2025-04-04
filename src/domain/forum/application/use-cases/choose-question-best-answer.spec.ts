@@ -1,5 +1,5 @@
 import { type Question } from '@/domain/forum/enterprise/entities/question';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { makeAnswer } from 'test/factories/make-answer';
 import { makeQuestion } from 'test/factories/make-question';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';

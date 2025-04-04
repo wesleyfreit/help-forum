@@ -1,6 +1,6 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { faker } from '@faker-js/faker';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
 import { CreateQuestionUseCase } from './create-question';

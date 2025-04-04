@@ -1,13 +1,13 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
 import { type Answer } from '@/domain/forum/enterprise/entities/answer';
 import { faker } from '@faker-js/faker';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { makeAnswer } from 'test/factories/make-answer';
 import { makeAnswerAttachment } from 'test/factories/make-answer-attachment';
 import { InMemoryAnswerAttachmentsRepository } from 'test/repositories/in-memory-answer-attachments-repository';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
 import { EditAnswerUseCase } from './edit-answer';
-import { NotAllowedError } from './errors/not-allowed-error';
 
 let answersRepository: InMemoryAnswersRepository;
 let answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository;

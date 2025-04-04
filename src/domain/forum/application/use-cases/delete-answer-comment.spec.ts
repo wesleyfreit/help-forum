@@ -1,9 +1,9 @@
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
 import { randomUUID } from 'node:crypto';
 import { makeAnswerComment } from 'test/factories/make-answer-comment';
 import { InMemoryAnswerCommentsRepository } from 'test/repositories/in-memory-answer-comments-repository';
 import { AnswerComment } from '../../enterprise/entities/answer-comment';
 import { DeleteAnswerCommentUseCase } from './delete-answer-comment';
-import { NotAllowedError } from './errors/not-allowed-error';
 
 let answerCommentsRepository: InMemoryAnswerCommentsRepository;
 let sut: DeleteAnswerCommentUseCase;
