@@ -6,7 +6,7 @@ interface FetchRecentQuestionsUseCaseRequest {
 }
 
 interface FetchRecentQuestionsUseCaseResponse {
-  questions: Question[];
+  recentQuestions: Question[];
 }
 
 export class FetchRecentQuestionsUseCase {
@@ -15,10 +15,10 @@ export class FetchRecentQuestionsUseCase {
   async execute({
     page,
   }: FetchRecentQuestionsUseCaseRequest): Promise<FetchRecentQuestionsUseCaseResponse> {
-    const questions = await this.questionsRepository.findManyRecent({ page });
+    const recentQuestions = await this.questionsRepository.findManyRecent({ page });
 
     return {
-      questions,
+      recentQuestions,
     };
   }
 }

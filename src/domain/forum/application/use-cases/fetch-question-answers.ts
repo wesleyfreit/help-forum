@@ -7,7 +7,7 @@ interface FetchQuestionAnswersUseCaseRequest {
 }
 
 interface FetchQuestionAnswersUseCaseResponse {
-  answers: Answer[];
+  questionAnswers: Answer[];
 }
 
 export class FetchQuestionAnswersUseCase {
@@ -17,12 +17,15 @@ export class FetchQuestionAnswersUseCase {
     page,
     questionId,
   }: FetchQuestionAnswersUseCaseRequest): Promise<FetchQuestionAnswersUseCaseResponse> {
-    const answers = await this.answersRepository.findManyByQuestionId(questionId, {
-      page,
-    });
+    const questionAnswers = await this.answersRepository.findManyByQuestionId(
+      questionId,
+      {
+        page,
+      },
+    );
 
     return {
-      answers,
+      questionAnswers,
     };
   }
 }
