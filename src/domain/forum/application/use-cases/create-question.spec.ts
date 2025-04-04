@@ -1,3 +1,4 @@
+import { UniqueEntityID } from '@/core/entities/unique-entity-id';
 import { faker } from '@faker-js/faker';
 import { randomUUID } from 'crypto';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
@@ -17,9 +18,16 @@ describe('Create Question Use Case', () => {
       authorId: randomUUID(),
       title: faker.lorem.sentence(),
       content: faker.lorem.text(),
+      attachmentsIds: ['1', '2'],
     });
 
     expect(result.isRight()).toBe(true);
     expect(questionsRepository.items[0]).toEqual(result.value?.question);
+
+    expect(questionsRepository.items[0].attachments).toHaveLength(2);
+    expect(questionsRepository.items[0].attachments).toEqual([
+      expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+      expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
+    ]);
   });
 });
