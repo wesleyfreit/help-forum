@@ -1,3 +1,4 @@
+import { Either, right } from '@/core/either';
 import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
 import { Question } from '../../enterprise/entities/question';
 import { QuestionsRepository } from '../repositories/questions-repository';
@@ -7,9 +8,12 @@ interface ChooseQuestionBestAnswerUseCaseRequest {
   authorId: string;
 }
 
-interface ChooseQuestionBestAnswerUseCaseResponse {
-  question: Question;
-}
+type ChooseQuestionBestAnswerUseCaseResponse = Either<
+  null,
+  {
+    question: Question;
+  }
+>;
 
 export class ChooseQuestionBestAnswerUseCase {
   constructor(
@@ -43,8 +47,8 @@ export class ChooseQuestionBestAnswerUseCase {
 
     await this.questionsRepository.create(question);
 
-    return {
+    return right({
       question,
-    };
+    });
   }
 }

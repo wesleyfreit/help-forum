@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { makeAnswer } from 'test/factories/make-answer';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
 import { DeleteAnswerUseCase } from './delete-answer';
+import { NotAllowedError } from './errors/not-allowed-error';
 
 let answersRepository: InMemoryAnswersRepository;
 let sut: DeleteAnswerUseCase;
@@ -28,11 +29,12 @@ describe('Delete Answer Use Case', () => {
   });
 
   it('should not be able to delete an answer from another user', async () => {
-    await expect(
-      sut.execute({
-        authorId: randomUUID(),
-        answerId: newAnswer.id.toString(),
-      }),
-    ).rejects.toBeInstanceOf(Error);
+    const result = await sut.execute({
+      authorId: randomUUID(),
+      answerId: newAnswer.id.toString(),
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(NotAllowedError);
   });
 });

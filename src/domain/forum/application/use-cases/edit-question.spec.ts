@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto';
 import { makeQuestion } from 'test/factories/make-question';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
 import { EditQuestionUseCase } from './edit-question';
+import { NotAllowedError } from './errors/not-allowed-error';
 
 let questionsRepository: InMemoryQuestionsRepository;
 let sut: EditQuestionUseCase;
@@ -37,13 +38,14 @@ describe('Edit Question Use Case', () => {
   });
 
   it('should not be able to edit a question from another user', async () => {
-    await expect(
-      sut.execute({
-        authorId: randomUUID(),
-        questionId: newQuestion.id.toString(),
-        title: faker.lorem.sentence(),
-        content: faker.lorem.text(),
-      }),
-    ).rejects.toBeInstanceOf(Error);
+    const result = await sut.execute({
+      authorId: randomUUID(),
+      questionId: newQuestion.id.toString(),
+      title: faker.lorem.sentence(),
+      content: faker.lorem.text(),
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(result.value).toBeInstanceOf(NotAllowedError);
   });
 });
