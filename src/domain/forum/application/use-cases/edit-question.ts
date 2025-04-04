@@ -28,7 +28,7 @@ export class EditQuestionUseCase {
     }
 
     if (question.authorId.toString() !== authorId) {
-      throw new Error('You are not the author of this question');
+      throw new Error('Not allowed');
     }
 
     question.title = title;

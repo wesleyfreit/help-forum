@@ -26,7 +26,7 @@ export class EditAnswerUseCase {
     }
 
     if (answer.authorId.toString() !== authorId) {
-      throw new Error('You are not the author of this answer');
+      throw new Error('Not allowed');
     }
 
     answer.content = content;

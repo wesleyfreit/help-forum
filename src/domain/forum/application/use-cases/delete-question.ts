@@ -21,7 +21,7 @@ export class DeleteQuestionUseCase {
     }
 
     if (question.authorId.toString() !== authorId) {
-      throw new Error('You are not the author of this question');
+      throw new Error('Not allowed');
     }
 
     await this.questionsRepository.delete(question);
