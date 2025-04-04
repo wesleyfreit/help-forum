@@ -19,7 +19,7 @@ describe('Edit Answer Use Case', () => {
     await answersRepository.create(newAnswer);
   });
 
-  it('should be able to edit a answer', async () => {
+  it('should be able to edit an answer', async () => {
     const content = faker.lorem.text();
 
     await sut.execute({
@@ -33,7 +33,7 @@ describe('Edit Answer Use Case', () => {
     });
   });
 
-  it('should not be able to edit a answer from another user', async () => {
+  it('should not be able to edit an answer from another user', async () => {
     await expect(
       sut.execute({
         authorId: randomUUID(),

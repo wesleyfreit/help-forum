@@ -6,7 +6,7 @@ import { FetchQuestionAnswersUseCase } from './fetch-question-answers';
 let answersRepository: InMemoryAnswersRepository;
 let sut: FetchQuestionAnswersUseCase;
 
-describe('Fetch  QuestionAnswers Use Case', () => {
+describe('Fetch Question Answers Use Case', () => {
   beforeEach(() => {
     answersRepository = new InMemoryAnswersRepository();
     sut = new FetchQuestionAnswersUseCase(answersRepository);

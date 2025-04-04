@@ -14,7 +14,7 @@ let sut: ChooseQuestionBestAnswerUseCase;
 let newQuestion: Question;
 let newAnswer: Answer;
 
-describe('Delete Question Use Case', () => {
+describe('Choose Question Best Answer Use Case', () => {
   beforeEach(async () => {
     questionsRepository = new InMemoryQuestionsRepository();
     answersRepository = new InMemoryAnswersRepository();
