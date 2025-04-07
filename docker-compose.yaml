@@ -1,0 +1,47 @@
+networks:
+  app-network:
+    driver: bridge
+    name: ${ENVIRONMENT_NAME}-network
+
+volumes:
+  app-data:
+    name: ${ENVIRONMENT_NAME}-data
+
+services:
+  postgresql:
+    image: bitnami/postgresql
+    container_name: ${ENVIRONMENT_NAME}-database
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRESQL_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRESQL_DATABASE=${ENVIRONMENT_NAME}
+    volumes:
+      - app-data:/bitnami/postgresql
+    healthcheck:
+      test: sh -c 'pg_isready -U ${POSTGRES_USERNAME} -d ${ENVIRONMENT_NAME}'
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  redis:
+    image: redis
+    container_name: ${ENVIRONMENT_NAME}-cache
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - 6379:6379
+    volumes:
+      - app-data:/data
+    healthcheck:
+      test: redis-cli ping
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
