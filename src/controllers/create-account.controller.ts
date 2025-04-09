@@ -1,12 +1,5 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import {
-  Body,
-  ConflictException,
-  Controller,
-  HttpCode,
-  Post,
-  UsePipes,
-} from '@nestjs/common';
+import { Body, ConflictException, Controller, Post } from '@nestjs/common';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -26,10 +19,10 @@ export const createAccountBodySchema = z.object({
 
 export type CreateAccountBody = z.infer<typeof createAccountBodySchema>;
 
+const bodyValidationPipe = new ZodValidationPipe(createAccountBodySchema);
+
 const createAccountResponseSchema = {
   201: z.object({
-    message: z.string().default('Account created'),
-    statusCode: z.number().default(201),
     user: z.object({
       id: z.string().uuid(),
       name: z.string(),
@@ -49,20 +42,18 @@ export class CreateAccountController {
   constructor(private prisma: PrismaService) {}
 
   @Post()
-  @HttpCode(201)
   @ApiOperation({
     summary: 'Create a new account',
     operationId: 'createAccount',
   })
   @ApiBody({ schema: zodToOpenAPI(createAccountBodySchema) })
-  @UsePipes(new ZodValidationPipe(createAccountBodySchema))
   @ApiConflictResponse({
     schema: zodToOpenAPI(createAccountResponseSchema[409]),
   })
   @ApiCreatedResponse({
     schema: zodToOpenAPI(createAccountResponseSchema[201]),
   })
-  async handle(@Body() body: CreateAccountBody) {
+  async handle(@Body(bodyValidationPipe) body: CreateAccountBody) {
     const { name, email, password } = body;
 
     const userWithSameEmail = await this.prisma.user.findUnique({
@@ -85,6 +76,12 @@ export class CreateAccountController {
       },
     });
 
-    return account;
+    return {
+      user: {
+        id: account.id,
+        name: account.name,
+        email: account.email,
+      },
+    };
   }
 }
