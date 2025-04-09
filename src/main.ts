@@ -1,29 +1,38 @@
 import { AppModule } from '@/app.module';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Env } from './env';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'development'
-        ? ['error', 'warn', 'debug', 'fatal', 'verbose', 'log']
-        : ['error'],
+    logger: [],
   });
 
   app.enableCors();
 
-  const config = new DocumentBuilder()
+  const configService = app.get<ConfigService<Env, true>>(ConfigService);
+
+  const env = configService.get('NODE_ENV', { infer: true });
+
+  if (env === 'development') {
+    app.useLogger(['error', 'warn', 'debug', 'verbose']);
+  }
+
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('Help Forum')
     .setDescription('This api is for a help forum application')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
 
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('docs', app, documentFactory);
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = configService.get('PORT', { infer: true });
+
+  await app.listen(port);
 }
 
 void bootstrap();
