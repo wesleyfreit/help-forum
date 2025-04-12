@@ -1,7 +1,7 @@
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { JWTAuthGuard } from '@/infra/auth/jwt-auth.guard';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
-import { PrismaService } from '@/infra/prisma/prisma.service';
+import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Body, ConflictException, Controller, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
