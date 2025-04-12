@@ -8,13 +8,13 @@ import { Slug } from './value-objects/slug';
 
 export interface QuestionProps {
   authorId: UniqueEntityID;
-  bestAnswerId?: UniqueEntityID;
+  bestAnswerId?: UniqueEntityID | null;
   attachments: QuestionAttachmentList;
   title: string;
   slug: Slug;
   content: string;
   createdAt: Date;
-  updatedAt?: Date;
+  updatedAt?: Date | null;
 }
 
 export class Question extends AggregateRoot<QuestionProps> {
@@ -75,15 +75,8 @@ export class Question extends AggregateRoot<QuestionProps> {
     return this.props.bestAnswerId;
   }
 
-  set bestAnswerId(bestAnswerId: UniqueEntityID | undefined) {
-    if (bestAnswerId === undefined) {
-      return;
-    }
-
-    if (
-      this.props.bestAnswerId === undefined ||
-      !this.props.bestAnswerId.equals(bestAnswerId)
-    ) {
+  set bestAnswerId(bestAnswerId: UniqueEntityID | undefined | null) {
+    if (bestAnswerId && bestAnswerId !== this.props.bestAnswerId) {
       this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, bestAnswerId));
     }
 

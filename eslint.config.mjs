@@ -28,6 +28,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/adjacent-overload-signatures': 'warn',
+      '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
