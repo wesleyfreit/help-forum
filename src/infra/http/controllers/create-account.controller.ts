@@ -1,4 +1,4 @@
-import { PrismaService } from '@/prisma/prisma.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
 import { Body, ConflictException, Controller, Post } from '@nestjs/common';
 import {
   ApiBody,

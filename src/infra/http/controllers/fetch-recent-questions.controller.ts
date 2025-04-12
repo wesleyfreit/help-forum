@@ -1,5 +1,5 @@
-import { JWTAuthGuard } from '@/auth/jwt-auth.guard';
-import { PrismaService } from '@/prisma/prisma.service';
+import { JWTAuthGuard } from '@/infra/auth/jwt-auth.guard';
+import { PrismaService } from '@/infra/prisma/prisma.service';
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -67,7 +67,7 @@ export class FetchRecentQuestionsController {
     schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[401]),
   })
   async handle(@Query('page', queryValidationPipe) page: PageQueryParam) {
-    const perPage = 10;
+    const perPage = 20;
 
     const questions = await this.prisma.question.findMany({
       orderBy: {

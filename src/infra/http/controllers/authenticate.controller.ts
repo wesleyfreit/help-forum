@@ -1,4 +1,4 @@
-import { PrismaService } from '@/prisma/prisma.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
 import { Body, Controller, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -36,6 +36,8 @@ const authenticateResponseSchema = {
     statusCode: z.number().default(401),
   }),
 } as const;
+
+export type AuthenticateResponse = z.infer<(typeof authenticateResponseSchema)[200]>;
 
 @ApiTags('Users')
 @Controller('/sessions')
