@@ -1,8 +1,7 @@
 import { AppModule } from '@/infra/app.module';
-import { Env } from '@/infra/env';
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { EnvService } from './env/env.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -11,8 +10,6 @@ async function bootstrap() {
 
   app.enableCors();
 
-  const configService = app.get<ConfigService<Env, true>>(ConfigService);
-
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Help Forum')
     .setDescription('This api is for a help forum application')
@@ -20,12 +17,12 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document);
 
-  SwaggerModule.setup('docs', app, documentFactory);
+  const envService = app.get(EnvService);
 
-  const port = configService.get('PORT', { infer: true });
-
+  const port = envService.get('PORT');
   await app.listen(port);
 }
 

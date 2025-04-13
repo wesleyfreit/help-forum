@@ -1,6 +1,13 @@
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
-import { Body, Controller, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student';
+import { InvalidCredentialsError } from '@/domain/forum/application/use-cases/errors/invalid-credentials-error';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiOkResponse,
@@ -8,9 +15,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { compare } from 'bcryptjs';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
+import { StudentPresenter } from '../presenters/student-presenter';
+import { Public } from '@/infra/auth/public';
 
 export const authenticateBodySchema = z.object({
   email: z.string().email(),
@@ -31,7 +39,7 @@ const authenticateResponseSchema = {
     }),
   }),
   401: z.object({
-    message: z.string().default('User credentials do not match'),
+    message: z.string().default('Credentials are not valid'),
     error: z.string().default('Unauthorized'),
     statusCode: z.number().default(401),
   }),
@@ -41,11 +49,9 @@ export type AuthenticateResponse = z.infer<(typeof authenticateResponseSchema)[2
 
 @ApiTags('Users')
 @Controller('/sessions')
+@Public()
 export class AuthenticateController {
-  constructor(
-    private jwt: JwtService,
-    private prisma: PrismaService,
-  ) {}
+  constructor(private authenticateStudent: AuthenticateStudentUseCase) {}
 
   @Post()
   @HttpCode(200)
@@ -63,29 +69,27 @@ export class AuthenticateController {
   async handle(@Body(bodyValidationPipe) body: AuthenticateBody) {
     const { email, password } = body;
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
+    const result = await this.authenticateStudent.execute({
+      email,
+      password,
     });
 
-    if (!user) {
-      throw new UnauthorizedException('User credentials do not match');
+    if (result.isLeft()) {
+      const error = result.value;
+
+      switch (error.constructor) {
+        case InvalidCredentialsError:
+          throw new UnauthorizedException(error.message);
+        default:
+          throw new BadRequestException(error.message);
+      }
     }
 
-    const passwordMatch = await compare(password, user.password);
-
-    if (!passwordMatch) {
-      throw new UnauthorizedException('User credentials do not match');
-    }
-
-    const accessToken = this.jwt.sign({}, { subject: user.id, expiresIn: '1h' });
+    const { accessToken, student } = result.value;
 
     return {
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
+        ...StudentPresenter.toHTTP(student),
         access_token: accessToken,
       },
     };

@@ -1,8 +1,7 @@
 import { CreateQuestionUseCase } from '@/domain/forum/application/use-cases/create-question';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
-import { JWTAuthGuard } from '@/infra/auth/jwt-auth.guard';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -39,7 +38,6 @@ const createQuestionResponseSchema = {
 @ApiTags('Questions')
 @ApiBearerAuth()
 @Controller('/questions')
-@UseGuards(JWTAuthGuard)
 export class CreateQuestionController {
   constructor(private createQuestion: CreateQuestionUseCase) {}
 

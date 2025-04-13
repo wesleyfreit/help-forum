@@ -1,7 +1,7 @@
 import { FetchRecentQuestionsUseCase } from '@/domain/forum/application/use-cases/fetch-recent-questions';
-import { JWTAuthGuard } from '@/infra/auth/jwt-auth.guard';
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
@@ -37,6 +37,10 @@ const fetchRecentQuestionsResponseSchema = {
       }),
     ),
   }),
+  400: z.object({
+    error: z.string().default('Bad Request'),
+    statusCode: z.number().default(400),
+  }),
   401: z.object({
     error: z.string().default('Unauthorized'),
     statusCode: z.number().default(401),
@@ -46,7 +50,6 @@ const fetchRecentQuestionsResponseSchema = {
 @ApiTags('Questions')
 @Controller('/questions')
 @ApiBearerAuth()
-@UseGuards(JWTAuthGuard)
 export class FetchRecentQuestionsController {
   constructor(private fetchRecentQuestions: FetchRecentQuestionsUseCase) {}
 
@@ -67,13 +70,16 @@ export class FetchRecentQuestionsController {
   @ApiUnauthorizedResponse({
     schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[401]),
   })
+  @ApiBadRequestResponse({
+    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[400]),
+  })
   async handle(@Query('page', queryValidationPipe) page: PageQueryParam) {
     const result = await this.fetchRecentQuestions.execute({
       page,
     });
 
     if (result.isLeft()) {
-      throw new Error('Error fetching recent questions');
+      throw new BadRequestException();
     }
 
     return {

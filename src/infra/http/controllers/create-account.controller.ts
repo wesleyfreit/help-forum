@@ -1,5 +1,12 @@
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
-import { Body, ConflictException, Controller, Post } from '@nestjs/common';
+import { StudentAlreadyExistsError } from '@/domain/forum/application/use-cases/errors/student-already-exists-error';
+import { RegisterStudentUseCase } from '@/domain/forum/application/use-cases/register-student';
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiConflictResponse,
@@ -7,9 +14,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { hash } from 'bcryptjs';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
+import { StudentPresenter } from '../presenters/student-presenter';
+import { Public } from '@/infra/auth/public';
 
 export const createAccountBodySchema = z.object({
   name: z.string(),
@@ -38,8 +46,9 @@ const createAccountResponseSchema = {
 
 @ApiTags('Users')
 @Controller('/accounts')
+@Public()
 export class CreateAccountController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private registerStudent: RegisterStudentUseCase) {}
 
   @Post()
   @ApiOperation({
@@ -56,32 +65,25 @@ export class CreateAccountController {
   async handle(@Body(bodyValidationPipe) body: CreateAccountBody) {
     const { name, email, password } = body;
 
-    const userWithSameEmail = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
+    const result = await this.registerStudent.execute({
+      name,
+      email,
+      password,
     });
 
-    if (userWithSameEmail) {
-      throw new ConflictException('User already exists');
+    if (result.isLeft()) {
+      const error = result.value;
+
+      switch (error.constructor) {
+        case StudentAlreadyExistsError:
+          throw new ConflictException('User already exists');
+        default:
+          throw new BadRequestException(error.message);
+      }
     }
 
-    const hashedPassword = await hash(password, 8);
-
-    const account = await this.prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
-
     return {
-      user: {
-        id: account.id,
-        name: account.name,
-        email: account.email,
-      },
+      user: { ...StudentPresenter.toHTTP(result.value.student) },
     };
   }
 }
