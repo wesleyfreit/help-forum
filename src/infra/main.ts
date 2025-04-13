@@ -21,8 +21,8 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   const envService = app.get(EnvService);
-
   const port = envService.get('PORT');
+
   await app.listen(port);
 }
 
