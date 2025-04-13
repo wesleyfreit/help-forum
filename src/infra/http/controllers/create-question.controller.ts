@@ -1,8 +1,8 @@
+import { CreateQuestionUseCase } from '@/domain/forum/application/use-cases/create-question';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { JWTAuthGuard } from '@/infra/auth/jwt-auth.guard';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
-import { Body, ConflictException, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -41,7 +41,7 @@ const createQuestionResponseSchema = {
 @Controller('/questions')
 @UseGuards(JWTAuthGuard)
 export class CreateQuestionController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private createQuestion: CreateQuestionUseCase) {}
 
   @Post()
   @ApiOperation({
@@ -63,35 +63,11 @@ export class CreateQuestionController {
     const { title, content } = body;
     const { sub: userId } = user;
 
-    const slug = this.convertToSlug(title);
-
-    const existingQuestion = await this.prisma.question.findUnique({
-      where: { slug },
+    await this.createQuestion.execute({
+      title,
+      content,
+      authorId: userId,
+      attachmentsIds: [],
     });
-
-    if (existingQuestion) {
-      throw new ConflictException('Question already exists');
-    }
-
-    await this.prisma.question.create({
-      data: {
-        title,
-        content,
-        slug,
-        authorId: userId,
-      },
-    });
-  }
-
-  private convertToSlug(text: string) {
-    return text
-      .normalize('NFKD')
-      .toLocaleLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
-      .replace(/_/g, '-')
-      .replace(/--+/g, '-')
-      .replace(/-$/g, '');
   }
 }

@@ -6,18 +6,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: [],
+    logger: process.env.NODE_ENV === 'development' ? undefined : false,
   });
 
   app.enableCors();
 
   const configService = app.get<ConfigService<Env, true>>(ConfigService);
-
-  const env = configService.get('NODE_ENV', { infer: true });
-
-  if (env === 'development') {
-    app.useLogger(['error', 'warn', 'debug', 'verbose']);
-  }
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Help Forum')

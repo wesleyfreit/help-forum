@@ -1,5 +1,5 @@
+import { FetchRecentQuestionsUseCase } from '@/domain/forum/application/use-cases/fetch-recent-questions';
 import { JWTAuthGuard } from '@/infra/auth/jwt-auth.guard';
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -11,6 +11,7 @@ import {
 } from '@nestjs/swagger';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
+import { QuestionPresenter } from '../presenters/question-presenter';
 
 const fetchRecentQuestionsQuerySchema = z.coerce
   .number()
@@ -47,7 +48,7 @@ const fetchRecentQuestionsResponseSchema = {
 @ApiBearerAuth()
 @UseGuards(JWTAuthGuard)
 export class FetchRecentQuestionsController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private fetchRecentQuestions: FetchRecentQuestionsUseCase) {}
 
   @Get()
   @ApiOkResponse({
@@ -67,16 +68,18 @@ export class FetchRecentQuestionsController {
     schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[401]),
   })
   async handle(@Query('page', queryValidationPipe) page: PageQueryParam) {
-    const perPage = 20;
-
-    const questions = await this.prisma.question.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: perPage,
-      skip: (page - 1) * perPage,
+    const result = await this.fetchRecentQuestions.execute({
+      page,
     });
 
-    return { questions };
+    if (result.isLeft()) {
+      throw new Error('Error fetching recent questions');
+    }
+
+    return {
+      questions: result.value.recentQuestions.map((question) =>
+        QuestionPresenter.toHTTP(question),
+      ),
+    };
   }
 }
