@@ -38,7 +38,7 @@ export class CreateQuestionController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new Question',
+    summary: 'Create a new question',
     operationId: 'createQuestion',
   })
   @ApiBody({ schema: zodToOpenAPI(createQuestionBodySchema) })

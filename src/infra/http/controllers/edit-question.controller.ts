@@ -46,7 +46,7 @@ export class EditQuestionController {
   @Put()
   @HttpCode(204)
   @ApiOperation({
-    summary: 'Edit a Question',
+    summary: 'Edit a question',
     operationId: 'editQuestion',
   })
   @ApiParam({

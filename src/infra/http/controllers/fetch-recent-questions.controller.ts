@@ -53,10 +53,15 @@ export class FetchRecentQuestionsController {
     operationId: 'fetchRecentQuestions',
   })
   @ApiQuery({
-    schema: zodToOpenAPI(fetchRecentQuestionsQuerySchema),
     name: 'page',
     required: false,
-    type: 'number',
+    default: 1,
+    schema: {
+      type: 'number',
+      default: 1,
+      minimum: 1,
+      nullable: true,
+    },
   })
   @ApiBadRequestResponse({
     schema: zodToOpenAPI(httpValidationErrorSchema[400]),
