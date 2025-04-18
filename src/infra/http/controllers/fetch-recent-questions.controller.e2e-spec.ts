@@ -1,26 +1,31 @@
+import { Slug } from '@/domain/forum/enterprise/entities/value-objects/slug';
 import { AppModule } from '@/infra/app.module';
-import { PrismaService } from '@/infra/database/prisma/prisma.service';
+import { DatabaseModule } from '@/infra/database/database.module';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import { hash } from 'bcryptjs';
 import { Server } from 'node:net';
 import request from 'supertest';
+import { QuestionFactory } from 'test/factories/make-question';
+import { StudentFactory } from 'test/factories/make-student';
 
 describe('Create question (E2E)', () => {
   let app: INestApplication<Server>;
-  let prisma: PrismaService;
   let jwt: JwtService;
+  let studentFactory: StudentFactory;
+  let questionFactory: QuestionFactory;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [AppModule, DatabaseModule],
+      providers: [StudentFactory, QuestionFactory],
     }).compile();
 
     app = moduleRef.createNestApplication();
 
-    prisma = app.get(PrismaService);
     jwt = app.get(JwtService);
+    studentFactory = app.get(StudentFactory);
+    questionFactory = app.get(QuestionFactory);
 
     await app.init();
   });
@@ -30,32 +35,20 @@ describe('Create question (E2E)', () => {
   });
 
   test('[GET] /questions', async () => {
-    const user = await prisma.user.create({
-      data: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: await hash('123456', 8),
-      },
-    });
+    const user = await studentFactory.makePrismaStudent();
 
-    const accessToken = jwt.sign({}, { subject: user.id });
+    const accessToken = jwt.sign({}, { subject: user.id.toString() });
 
-    await prisma.question.createMany({
-      data: [
-        {
-          title: 'New Question',
-          content: 'question content',
-          slug: 'new-question',
-          authorId: user.id,
-        },
-        {
-          title: 'Another Question',
-          content: 'question content',
-          slug: 'another-question',
-          authorId: user.id,
-        },
-      ],
-    });
+    await Promise.all([
+      questionFactory.makePrismaQuestion({
+        authorId: user.id,
+        slug: Slug.create('new-question'),
+      }),
+      questionFactory.makePrismaQuestion({
+        authorId: user.id,
+        slug: Slug.create('another-question'),
+      }),
+    ]);
 
     const response = await request(app.getHttpServer())
       .get('/questions')

@@ -10,13 +10,13 @@ export class PrismaQuestionCommentsRepository implements QuestionCommentsReposit
   constructor(private prisma: PrismaService) {}
 
   async create(questionComment: QuestionComment): Promise<void> {
-    const data = PrismaQuestionCommentMapper.toPersistence(questionComment);
+    const data = PrismaQuestionCommentMapper.toPrisma(questionComment);
 
     await this.prisma.comment.create({ data });
   }
 
   async save(questionComment: QuestionComment): Promise<void> {
-    const data = PrismaQuestionCommentMapper.toPersistence(questionComment);
+    const data = PrismaQuestionCommentMapper.toPrisma(questionComment);
 
     await this.prisma.comment.update({
       where: {

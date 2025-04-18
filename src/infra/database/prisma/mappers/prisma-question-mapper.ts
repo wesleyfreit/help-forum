@@ -19,7 +19,7 @@ export class PrismaQuestionMapper {
     );
   }
 
-  static toPersistence(question: Question): Prisma.QuestionUncheckedCreateInput {
+  static toPrisma(question: Question): Prisma.QuestionUncheckedCreateInput {
     return {
       id: question.id.toString(),
       title: question.title,

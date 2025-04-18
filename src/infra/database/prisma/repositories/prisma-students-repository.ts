@@ -9,7 +9,7 @@ export class PrismaStudentsRepository implements StudentsRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(student: Student): Promise<void> {
-    const data = PrismaStudentMapper.toPersistence(student);
+    const data = PrismaStudentMapper.toPrisma(student);
 
     await this.prisma.user.create({ data });
   }
