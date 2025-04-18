@@ -51,7 +51,7 @@ export class GetQuestionBySlugController {
   @ApiParam({
     schema: zodToOpenAPI(getQuestionBySlugParamSchema),
     name: 'slug',
-    required: false,
+    required: true,
     type: 'string',
   })
   @ApiBadRequestResponse({
