@@ -1,5 +1,6 @@
 import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student';
 import { InvalidCredentialsError } from '@/domain/forum/application/use-cases/errors/invalid-credentials-error';
+import { Public } from '@/infra/auth/public';
 import {
   BadRequestException,
   Body,
@@ -18,7 +19,6 @@ import {
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 import { StudentPresenter } from '../presenters/student-presenter';
-import { Public } from '@/infra/auth/public';
 
 export const authenticateBodySchema = z.object({
   email: z.string().email(),
@@ -29,23 +29,20 @@ export type AuthenticateBody = z.infer<typeof authenticateBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(authenticateBodySchema);
 
-const authenticateResponseSchema = {
-  200: z.object({
-    user: z.object({
-      id: z.string().uuid(),
-      name: z.string(),
-      email: z.string().email(),
-      access_token: z.string().jwt(),
-    }),
+const authenticateResponseSchema = z.object({
+  user: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    email: z.string().email(),
+    access_token: z.string().jwt(),
   }),
-  401: z.object({
-    message: z.string().default('Credentials are not valid'),
-    error: z.string().default('Unauthorized'),
-    statusCode: z.number().default(401),
-  }),
-} as const;
+});
 
-export type AuthenticateResponse = z.infer<(typeof authenticateResponseSchema)[200]>;
+const invalidCredentialsErrorSchema = z.object({
+  message: z.string().default('Credentials are not valid'),
+  error: z.string().default('Unauthorized'),
+  statusCode: z.number().default(401),
+});
 
 @ApiTags('Users')
 @Controller('/sessions')
@@ -61,10 +58,10 @@ export class AuthenticateController {
   })
   @ApiBody({ schema: zodToOpenAPI(authenticateBodySchema) })
   @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(authenticateResponseSchema[401]),
+    schema: zodToOpenAPI(invalidCredentialsErrorSchema),
   })
   @ApiOkResponse({
-    schema: zodToOpenAPI(authenticateResponseSchema[200]),
+    schema: zodToOpenAPI(authenticateResponseSchema),
   })
   async handle(@Body(bodyValidationPipe) body: AuthenticateBody) {
     const { email, password } = body;

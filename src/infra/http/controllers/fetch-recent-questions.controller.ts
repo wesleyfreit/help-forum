@@ -1,3 +1,4 @@
+import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { FetchRecentQuestionsUseCase } from '@/domain/forum/application/use-cases/fetch-recent-questions';
 import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import {
@@ -23,29 +24,19 @@ const queryValidationPipe = new ZodValidationPipe(fetchRecentQuestionsQuerySchem
 
 type PageQueryParam = z.infer<typeof fetchRecentQuestionsQuerySchema>;
 
-const fetchRecentQuestionsResponseSchema = {
-  200: z.object({
-    questions: z.array(
-      z.object({
-        id: z.string().uuid(),
-        title: z.string(),
-        sçug: z.string(),
-        content: z.string(),
-        createdAt: z.date(),
-        updatedAt: z.date(),
-        authorId: z.string().uuid(),
-      }),
-    ),
-  }),
-  400: z.object({
-    error: z.string().default('Bad Request'),
-    statusCode: z.number().default(400),
-  }),
-  401: z.object({
-    error: z.string().default('Unauthorized'),
-    statusCode: z.number().default(401),
-  }),
-} as const;
+const fetchRecentQuestionsResponseSchema = z.object({
+  questions: z.array(
+    z.object({
+      id: z.string().uuid(),
+      title: z.string(),
+      sçug: z.string(),
+      content: z.string(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
+      authorId: z.string().uuid(),
+    }),
+  ),
+});
 
 @ApiTags('Questions')
 @Controller('/questions')
@@ -55,7 +46,7 @@ export class FetchRecentQuestionsController {
 
   @Get()
   @ApiOkResponse({
-    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[200]),
+    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema),
   })
   @ApiOperation({
     summary: 'Fetch recent questions',
@@ -67,11 +58,11 @@ export class FetchRecentQuestionsController {
     required: false,
     type: 'number',
   })
-  @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[401]),
-  })
   @ApiBadRequestResponse({
-    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema[400]),
+    schema: zodToOpenAPI(httpValidationErrorSchema[400]),
+  })
+  @ApiUnauthorizedResponse({
+    schema: zodToOpenAPI(httpValidationErrorSchema[401]),
   })
   async handle(@Query('page', queryValidationPipe) page: PageQueryParam) {
     const result = await this.fetchRecentQuestions.execute({

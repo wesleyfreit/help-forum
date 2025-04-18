@@ -1,5 +1,6 @@
 import { StudentAlreadyExistsError } from '@/domain/forum/application/use-cases/errors/student-already-exists-error';
 import { RegisterStudentUseCase } from '@/domain/forum/application/use-cases/register-student';
+import { Public } from '@/infra/auth/public';
 import {
   BadRequestException,
   Body,
@@ -17,7 +18,6 @@ import {
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 import { StudentPresenter } from '../presenters/student-presenter';
-import { Public } from '@/infra/auth/public';
 
 export const createAccountBodySchema = z.object({
   name: z.string(),
@@ -29,20 +29,19 @@ export type CreateAccountBody = z.infer<typeof createAccountBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(createAccountBodySchema);
 
-const createAccountResponseSchema = {
-  201: z.object({
-    user: z.object({
-      id: z.string().uuid(),
-      name: z.string(),
-      email: z.string().email(),
-    }),
+const createAccountResponseSchema = z.object({
+  user: z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    email: z.string().email(),
   }),
-  409: z.object({
-    message: z.string().default('User already exists'),
-    error: z.string().default('Conflict'),
-    statusCode: z.number().default(409),
-  }),
-} as const;
+});
+
+const userAlreadyExistsErrorSchema = z.object({
+  message: z.string().default('User already exists'),
+  error: z.string().default('Conflict'),
+  statusCode: z.number().default(409),
+});
 
 @ApiTags('Users')
 @Controller('/accounts')
@@ -57,10 +56,10 @@ export class CreateAccountController {
   })
   @ApiBody({ schema: zodToOpenAPI(createAccountBodySchema) })
   @ApiConflictResponse({
-    schema: zodToOpenAPI(createAccountResponseSchema[409]),
+    schema: zodToOpenAPI(userAlreadyExistsErrorSchema),
   })
   @ApiCreatedResponse({
-    schema: zodToOpenAPI(createAccountResponseSchema[201]),
+    schema: zodToOpenAPI(createAccountResponseSchema),
   })
   async handle(@Body(bodyValidationPipe) body: CreateAccountBody) {
     const { name, email, password } = body;
