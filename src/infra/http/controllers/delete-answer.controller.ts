@@ -31,7 +31,7 @@ const deleteAnswerParamSchema = z.string().uuid();
 
 const paramValidationPipe = new ZodValidationPipe(deleteAnswerParamSchema);
 
-type AnswerIdRouterParam = z.infer<typeof deleteAnswerParamSchema>;
+type AnswerIdPathParam = z.infer<typeof deleteAnswerParamSchema>;
 
 @ApiTags('Answers')
 @ApiBearerAuth()
@@ -57,7 +57,7 @@ export class DeleteAnswerController {
   @ApiForbiddenResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[403]) })
   @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(
-    @Param('answerId', paramValidationPipe) answerId: AnswerIdRouterParam,
+    @Param('answerId', paramValidationPipe) answerId: AnswerIdPathParam,
     @CurrentUser() user: UserPayload,
   ) {
     const { sub: userId } = user;

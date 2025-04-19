@@ -1,4 +1,3 @@
-import { Slug } from '@/domain/forum/enterprise/entities/value-objects/slug';
 import { AppModule } from '@/infra/app.module';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { INestApplication } from '@nestjs/common';
@@ -6,24 +5,27 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { Server } from 'node:net';
 import request from 'supertest';
+import { AnswerFactory } from 'test/factories/make-answer';
 import { QuestionFactory } from 'test/factories/make-question';
 import { StudentFactory } from 'test/factories/make-student';
 
-describe('Fetch recent questions (E2E)', () => {
+describe('Fetch question answers (E2E)', () => {
   let app: INestApplication<Server>;
   let jwt: JwtService;
+  let answerFactory: AnswerFactory;
   let studentFactory: StudentFactory;
   let questionFactory: QuestionFactory;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [StudentFactory, QuestionFactory],
+      providers: [AnswerFactory, StudentFactory, QuestionFactory],
     }).compile();
 
     app = moduleRef.createNestApplication();
 
     jwt = app.get(JwtService);
+    answerFactory = app.get(AnswerFactory);
     studentFactory = app.get(StudentFactory);
     questionFactory = app.get(QuestionFactory);
 
@@ -34,24 +36,30 @@ describe('Fetch recent questions (E2E)', () => {
     await app.close();
   });
 
-  test('[GET] /questions', async () => {
+  test('[GET] /questions/:questionId/answers', async () => {
     const user = await studentFactory.makePrismaStudent();
 
     const accessToken = jwt.sign({}, { subject: user.id.toString() });
 
+    const question = await questionFactory.makePrismaQuestion({
+      authorId: user.id,
+    });
+
     await Promise.all([
-      questionFactory.makePrismaQuestion({
+      answerFactory.makePrismaAnswer({
         authorId: user.id,
-        slug: Slug.create('new-question'),
+        questionId: question.id,
+        content: 'new answer',
       }),
-      questionFactory.makePrismaQuestion({
+      answerFactory.makePrismaAnswer({
         authorId: user.id,
-        slug: Slug.create('another-question'),
+        questionId: question.id,
+        content: 'another answer',
       }),
     ]);
 
     const response = await request(app.getHttpServer())
-      .get('/questions')
+      .get(`/questions/${question.id.toString()}/answers`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send();
 
@@ -59,9 +67,9 @@ describe('Fetch recent questions (E2E)', () => {
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        questions: expect.arrayContaining([
-          expect.objectContaining({ slug: 'new-question' }),
-          expect.objectContaining({ slug: 'another-question' }),
+        answers: expect.arrayContaining([
+          expect.objectContaining({ content: 'new answer' }),
+          expect.objectContaining({ content: 'another answer' }),
         ]),
       }),
     );
