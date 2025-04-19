@@ -62,8 +62,6 @@ export class GetQuestionBySlugController {
   @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
   @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(@Param('slug', paramValidationPipe) slug: SlugRouterParam) {
-    console.log(slug);
-
     const result = await this.getQuestionBySlug.execute({ slug });
 
     if (result.isLeft()) {
