@@ -45,9 +45,6 @@ export class FetchRecentQuestionsController {
   constructor(private fetchRecentQuestions: FetchRecentQuestionsUseCase) {}
 
   @Get()
-  @ApiOkResponse({
-    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema),
-  })
   @ApiOperation({
     summary: 'Fetch recent questions',
     operationId: 'fetchRecentQuestions',
@@ -63,12 +60,11 @@ export class FetchRecentQuestionsController {
       nullable: true,
     },
   })
-  @ApiBadRequestResponse({
-    schema: zodToOpenAPI(httpValidationErrorSchema[400]),
+  @ApiOkResponse({
+    schema: zodToOpenAPI(fetchRecentQuestionsResponseSchema),
   })
-  @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(httpValidationErrorSchema[401]),
-  })
+  @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
+  @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
   async handle(@Query('page', queryValidationPipe) page: PageQueryParam) {
     const result = await this.fetchRecentQuestions.execute({
       page,

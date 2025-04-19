@@ -1,13 +1,26 @@
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
 import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { EditQuestionUseCase } from '@/domain/forum/application/use-cases/edit-question';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
-import { Body, Controller, HttpCode, Param, Put } from '@nestjs/common';
 import {
+  BadRequestException,
+  Body,
+  Controller,
+  ForbiddenException,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Put,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
-  ApiConflictResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
@@ -31,12 +44,6 @@ export type EditQuestionBody = z.infer<typeof editQuestionBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(editQuestionBodySchema);
 
-const questionAlreadyExistsErrorSchema = z.object({
-  message: z.string().default('Question already exists'),
-  error: z.string().default('Conflict'),
-  statusCode: z.number().default(409),
-});
-
 @ApiTags('Questions')
 @ApiBearerAuth()
 @Controller('/questions/:questionId')
@@ -56,13 +63,11 @@ export class EditQuestionController {
     type: 'string',
   })
   @ApiBody({ schema: zodToOpenAPI(editQuestionBodySchema) })
-  @ApiNoContentResponse({ description: 'Question edited' })
-  @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(httpValidationErrorSchema[401]),
-  })
-  @ApiConflictResponse({
-    schema: zodToOpenAPI(questionAlreadyExistsErrorSchema),
-  })
+  @ApiNoContentResponse({ description: 'Question updated' })
+  @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
+  @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
+  @ApiForbiddenResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[403]) })
+  @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(
     @Param('questionId', paramValidationPipe) questionId: QuestionIdRouterParam,
     @Body(bodyValidationPipe) body: EditQuestionBody,
@@ -71,12 +76,25 @@ export class EditQuestionController {
     const { title, content } = body;
     const { sub: userId } = user;
 
-    await this.editQuestion.execute({
+    const result = await this.editQuestion.execute({
       questionId,
       title,
       content,
       authorId: userId,
       attachmentsIds: [],
     });
+
+    if (result.isLeft()) {
+      const error = result.value;
+
+      switch (error.constructor) {
+        case ResourceNotFoundError:
+          throw new NotFoundException(error.message);
+        case NotAllowedError:
+          throw new ForbiddenException(error.message);
+        default:
+          throw new BadRequestException();
+      }
+    }
   }
 }

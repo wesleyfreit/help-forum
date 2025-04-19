@@ -9,4 +9,19 @@ export const httpValidationErrorSchema = {
     error: z.string().default('Unauthorized'),
     statusCode: z.number().default(401),
   }),
+  403: z.object({
+    message: z.string().default('Not Allowed'),
+    error: z.string().default('Forbidden'),
+    statusCode: z.number().default(403),
+  }),
+  404: z.object({
+    error: z.string().default('Resource Not Found'),
+    statusCode: z.number().default(404),
+  }),
+  409: (name: string = 'Resource') =>
+    z.object({
+      message: z.string().default(`${name} already exists`),
+      error: z.string().default('Conflict'),
+      statusCode: z.number().default(409),
+    }),
 } as const;

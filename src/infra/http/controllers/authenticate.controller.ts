@@ -1,3 +1,4 @@
+import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student';
 import { InvalidCredentialsError } from '@/domain/forum/application/use-cases/errors/invalid-credentials-error';
 import { Public } from '@/infra/auth/public';
@@ -10,6 +11,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
@@ -57,12 +59,9 @@ export class AuthenticateController {
     operationId: 'authenticate',
   })
   @ApiBody({ schema: zodToOpenAPI(authenticateBodySchema) })
-  @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(invalidCredentialsErrorSchema),
-  })
-  @ApiOkResponse({
-    schema: zodToOpenAPI(authenticateResponseSchema),
-  })
+  @ApiOkResponse({ schema: zodToOpenAPI(authenticateResponseSchema) })
+  @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
+  @ApiUnauthorizedResponse({ schema: zodToOpenAPI(invalidCredentialsErrorSchema) })
   async handle(@Body(bodyValidationPipe) body: AuthenticateBody) {
     const { email, password } = body;
 
@@ -78,7 +77,7 @@ export class AuthenticateController {
         case InvalidCredentialsError:
           throw new UnauthorizedException(error.message);
         default:
-          throw new BadRequestException(error.message);
+          throw new BadRequestException();
       }
     }
 

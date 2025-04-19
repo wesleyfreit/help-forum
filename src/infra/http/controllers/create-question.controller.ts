@@ -2,11 +2,11 @@ import { httpValidationErrorSchema } from '@/core/errors/validation/http-validat
 import { CreateQuestionUseCase } from '@/domain/forum/application/use-cases/create-question';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
-import { Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
-  ApiConflictResponse,
   ApiCreatedResponse,
   ApiOperation,
   ApiTags,
@@ -24,12 +24,6 @@ export type CreateQuestionBody = z.infer<typeof createQuestionBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(createQuestionBodySchema);
 
-const questionAlreadyExistsErrorSchema = z.object({
-  message: z.string().default('Question already exists'),
-  error: z.string().default('Conflict'),
-  statusCode: z.number().default(409),
-});
-
 @ApiTags('Questions')
 @ApiBearerAuth()
 @Controller('/questions')
@@ -43,12 +37,8 @@ export class CreateQuestionController {
   })
   @ApiBody({ schema: zodToOpenAPI(createQuestionBodySchema) })
   @ApiCreatedResponse({ description: 'Question created' })
-  @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(httpValidationErrorSchema[401]),
-  })
-  @ApiConflictResponse({
-    schema: zodToOpenAPI(questionAlreadyExistsErrorSchema),
-  })
+  @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
+  @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
   async handle(
     @Body(bodyValidationPipe) body: CreateQuestionBody,
     @CurrentUser() user: UserPayload,
@@ -56,11 +46,15 @@ export class CreateQuestionController {
     const { title, content } = body;
     const { sub: userId } = user;
 
-    await this.createQuestion.execute({
+    const result = await this.createQuestion.execute({
       title,
       content,
       authorId: userId,
       attachmentsIds: [],
     });
+
+    if (result.isLeft()) {
+      throw new BadRequestException();
+    }
   }
 }

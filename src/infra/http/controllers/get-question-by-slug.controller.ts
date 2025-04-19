@@ -1,9 +1,17 @@
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
 import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { GetQuestionBySlugUseCase } from '@/domain/forum/application/use-cases/get-question-by-slug';
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -20,19 +28,17 @@ const paramValidationPipe = new ZodValidationPipe(getQuestionBySlugParamSchema);
 
 type SlugRouterParam = z.infer<typeof getQuestionBySlugParamSchema>;
 
-const getQuestionBlySlugResponseSchema = {
-  200: z.object({
-    question: z.object({
-      id: z.string().uuid(),
-      title: z.string(),
-      sçug: z.string(),
-      content: z.string(),
-      createdAt: z.date(),
-      updatedAt: z.date(),
-      authorId: z.string().uuid(),
-    }),
+const getQuestionBlySlugResponseSchema = z.object({
+  question: z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    sçug: z.string(),
+    content: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    authorId: z.string().uuid(),
   }),
-} as const;
+});
 
 @ApiTags('Questions')
 @Controller('/questions/:slug')
@@ -41,9 +47,6 @@ export class GetQuestionBySlugController {
   constructor(private getQuestionBySlug: GetQuestionBySlugUseCase) {}
 
   @Get()
-  @ApiOkResponse({
-    schema: zodToOpenAPI(getQuestionBlySlugResponseSchema[200]),
-  })
   @ApiOperation({
     summary: 'Get question by slug',
     operationId: 'getQuestionBySlug',
@@ -54,19 +57,24 @@ export class GetQuestionBySlugController {
     required: true,
     type: 'string',
   })
-  @ApiBadRequestResponse({
-    schema: zodToOpenAPI(httpValidationErrorSchema[400]),
-  })
-  @ApiUnauthorizedResponse({
-    schema: zodToOpenAPI(httpValidationErrorSchema[401]),
-  })
+  @ApiOkResponse({ schema: zodToOpenAPI(getQuestionBlySlugResponseSchema) })
+  @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
+  @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
+  @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(@Param('slug', paramValidationPipe) slug: SlugRouterParam) {
     console.log(slug);
 
     const result = await this.getQuestionBySlug.execute({ slug });
 
     if (result.isLeft()) {
-      throw new BadRequestException();
+      const error = result.value;
+
+      switch (error.constructor) {
+        case ResourceNotFoundError:
+          throw new NotFoundException(error.message);
+        default:
+          throw new BadRequestException();
+      }
     }
 
     return {

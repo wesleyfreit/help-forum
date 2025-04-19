@@ -1,3 +1,4 @@
+import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { StudentAlreadyExistsError } from '@/domain/forum/application/use-cases/errors/student-already-exists-error';
 import { RegisterStudentUseCase } from '@/domain/forum/application/use-cases/register-student';
 import { Public } from '@/infra/auth/public';
@@ -9,6 +10,7 @@ import {
   Post,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -17,7 +19,6 @@ import {
 } from '@nestjs/swagger';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
-import { StudentPresenter } from '../presenters/student-presenter';
 
 export const createAccountBodySchema = z.object({
   name: z.string(),
@@ -28,20 +29,6 @@ export const createAccountBodySchema = z.object({
 export type CreateAccountBody = z.infer<typeof createAccountBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(createAccountBodySchema);
-
-const createAccountResponseSchema = z.object({
-  user: z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    email: z.string().email(),
-  }),
-});
-
-const userAlreadyExistsErrorSchema = z.object({
-  message: z.string().default('User already exists'),
-  error: z.string().default('Conflict'),
-  statusCode: z.number().default(409),
-});
 
 @ApiTags('Users')
 @Controller('/accounts')
@@ -55,11 +42,10 @@ export class CreateAccountController {
     operationId: 'createAccount',
   })
   @ApiBody({ schema: zodToOpenAPI(createAccountBodySchema) })
+  @ApiCreatedResponse({ description: 'Account created' })
+  @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
   @ApiConflictResponse({
-    schema: zodToOpenAPI(userAlreadyExistsErrorSchema),
-  })
-  @ApiCreatedResponse({
-    schema: zodToOpenAPI(createAccountResponseSchema),
+    schema: zodToOpenAPI(httpValidationErrorSchema[409]('Student')),
   })
   async handle(@Body(bodyValidationPipe) body: CreateAccountBody) {
     const { name, email, password } = body;
@@ -75,14 +61,10 @@ export class CreateAccountController {
 
       switch (error.constructor) {
         case StudentAlreadyExistsError:
-          throw new ConflictException('User already exists');
+          throw new ConflictException(error.message);
         default:
-          throw new BadRequestException(error.message);
+          throw new BadRequestException();
       }
     }
-
-    return {
-      user: { ...StudentPresenter.toHTTP(result.value.student) },
-    };
   }
 }
