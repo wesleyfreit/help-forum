@@ -8,7 +8,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
-  ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -45,7 +44,6 @@ export class AnswerQuestionController {
   @ApiCreatedResponse({ description: 'Question answered' })
   @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
   @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
-  @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(
     @Param('questionId', paramValidationPipe) questionId: QuestionIdRouterParam,
     @Body(bodyValidationPipe) body: AnswerQuestionBody,
