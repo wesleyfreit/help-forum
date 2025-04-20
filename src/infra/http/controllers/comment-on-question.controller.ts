@@ -1,3 +1,4 @@
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
 import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { CommentOnQuestionUseCase } from '@/domain/forum/application/use-cases/comment-on-question';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
@@ -8,6 +9,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -44,6 +46,7 @@ export class CommentOnQuestionController {
   @ApiCreatedResponse({ description: 'Question answered' })
   @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
   @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
+  @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(
     @Param('questionId', paramValidationPipe) questionId: QuestionIdRouterParam,
     @Body(bodyValidationPipe) body: CommentOnQuestionBody,
@@ -59,7 +62,14 @@ export class CommentOnQuestionController {
     });
 
     if (result.isLeft()) {
-      throw new BadRequestException();
+      const error = result.value;
+
+      switch (error.constructor) {
+        case ResourceNotFoundError:
+          throw new BadRequestException(error.message);
+        default:
+          throw new BadRequestException();
+      }
     }
   }
 }
