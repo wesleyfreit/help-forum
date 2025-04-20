@@ -72,4 +72,26 @@ describe('Edit Question Use Case', () => {
     expect(result.isLeft()).toBe(true);
     expect(result.value).toBeInstanceOf(NotAllowedError);
   });
+
+  it('should sync new and removed attachments when editing a question', async () => {
+    const title = faker.lorem.sentence();
+    const content = faker.lorem.text();
+
+    const result = await sut.execute({
+      authorId: newQuestion.authorId.toString(),
+      questionId: newQuestion.id.toString(),
+      attachmentsIds: ['1', '3'],
+      title,
+      content,
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(questionAttachmentsRepository.items).toHaveLength(2);
+    expect(questionAttachmentsRepository.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('3') }),
+      ]),
+    );
+  });
 });

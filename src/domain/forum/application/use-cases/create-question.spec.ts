@@ -28,9 +28,29 @@ describe('Create Question Use Case', () => {
     expect(questionsRepository.items[0]).toEqual(result.value?.question);
 
     expect(questionsRepository.items[0].attachments.currentItems).toHaveLength(2);
-    expect(questionsRepository.items[0].attachments.currentItems).toEqual([
-      expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
-      expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
-    ]);
+    expect(questionsRepository.items[0].attachments.currentItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
+      ]),
+    );
+  });
+
+  it('should persist attachments when creating a new question', async () => {
+    const result = await sut.execute({
+      authorId: randomUUID(),
+      title: faker.lorem.sentence(),
+      content: faker.lorem.text(),
+      attachmentsIds: ['1', '2'],
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(questionAttachmentsRepository.items).toHaveLength(2);
+    expect(questionAttachmentsRepository.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
+      ]),
+    );
   });
 });
