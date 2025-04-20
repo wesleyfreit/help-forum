@@ -45,11 +45,11 @@ describe('Choose Question Best Answer Use Case', () => {
   });
 
   it('should not be able to choose a question another user question best answer', async () => {
-    await expect(
-      sut.execute({
-        authorId: randomUUID(),
-        answerId: newQuestion.id.toString(),
-      }),
-    ).rejects.toBeInstanceOf(Error);
+    const result = await sut.execute({
+      authorId: randomUUID(),
+      answerId: newAnswer.id.toString(),
+    });
+
+    expect(result.isLeft()).toBe(true);
   });
 });
