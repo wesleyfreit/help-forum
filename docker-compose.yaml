@@ -29,6 +29,24 @@ services:
       retries: 3
       start_period: 5s
 
+  localstack:
+    image: localstack/localstack
+    container_name: ${ENVIRONMENT_NAME}-s3
+    networks:
+      - app-network
+    ports:
+      - 4566:4566
+    environment:
+      - SERVICES=s3
+    volumes:
+      - app-data:/localstack
+    healthcheck:
+      test: awslocal s3api list-buckets
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
   redis:
     image: redis
     container_name: ${ENVIRONMENT_NAME}-cache

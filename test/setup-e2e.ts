@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import { randomUUID } from 'crypto';
 import { config } from 'dotenv';
+import { createBucket } from 'scripts/create-bucket';
 
 config({ path: '.env.test', override: true });
 
@@ -27,6 +28,8 @@ beforeAll(() => {
   process.env.DATABASE_URL = databaseURL;
 
   execSync('pnpm prisma migrate deploy');
+
+  void createBucket();
 });
 
 afterAll(async () => {
