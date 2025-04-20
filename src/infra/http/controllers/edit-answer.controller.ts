@@ -35,11 +35,11 @@ const paramValidationPipe = new ZodValidationPipe(editAnswerParamSchema);
 
 type AnswerIdRouterParam = z.infer<typeof editAnswerParamSchema>;
 
-export const editAnswerBodySchema = z.object({
+const editAnswerBodySchema = z.object({
   content: z.string(),
 });
 
-export type EditAnswerBody = z.infer<typeof editAnswerBodySchema>;
+type EditAnswerBody = z.infer<typeof editAnswerBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(editAnswerBodySchema);
 

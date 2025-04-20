@@ -20,13 +20,13 @@ import {
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 
-export const createAccountBodySchema = z.object({
+const createAccountBodySchema = z.object({
   name: z.string(),
   email: z.string().email(),
   password: z.string().min(6),
 });
 
-export type CreateAccountBody = z.infer<typeof createAccountBodySchema>;
+type CreateAccountBody = z.infer<typeof createAccountBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(createAccountBodySchema);
 

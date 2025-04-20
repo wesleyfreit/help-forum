@@ -15,12 +15,12 @@ import {
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 
-export const createQuestionBodySchema = z.object({
+const createQuestionBodySchema = z.object({
   title: z.string(),
   content: z.string(),
 });
 
-export type CreateQuestionBody = z.infer<typeof createQuestionBodySchema>;
+type CreateQuestionBody = z.infer<typeof createQuestionBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(createQuestionBodySchema);
 

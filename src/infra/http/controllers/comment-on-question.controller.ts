@@ -1,5 +1,5 @@
 import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
-import { AnswerQuestionUseCase } from '@/domain/forum/application/use-cases/answer-question';
+import { CommentOnQuestionUseCase } from '@/domain/forum/application/use-cases/comment-on-question';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
 import { BadRequestException, Body, Controller, Param, Post } from '@nestjs/common';
@@ -15,48 +15,47 @@ import {
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 
-const answerQuestionParamSchema = z.string().uuid();
+const commentOnQuestionParamSchema = z.string().uuid();
 
-const paramValidationPipe = new ZodValidationPipe(answerQuestionParamSchema);
+const paramValidationPipe = new ZodValidationPipe(commentOnQuestionParamSchema);
 
-type QuestionIdRouterParam = z.infer<typeof answerQuestionParamSchema>;
+type QuestionIdRouterParam = z.infer<typeof commentOnQuestionParamSchema>;
 
-const answerQuestionBodySchema = z.object({
+const commentOnQuestionBodySchema = z.object({
   content: z.string(),
 });
 
-type AnswerQuestionBody = z.infer<typeof answerQuestionBodySchema>;
+type CommentOnQuestionBody = z.infer<typeof commentOnQuestionBodySchema>;
 
-const bodyValidationPipe = new ZodValidationPipe(answerQuestionBodySchema);
+const bodyValidationPipe = new ZodValidationPipe(commentOnQuestionBodySchema);
 
-@ApiTags('Answers')
+@ApiTags('Comments')
 @ApiBearerAuth()
-@Controller('/questions/:questionId/answers')
-export class AnswerQuestionController {
-  constructor(private answerQuestion: AnswerQuestionUseCase) {}
+@Controller('/questions/:questionId/comments')
+export class CommentOnQuestionController {
+  constructor(private commentOnQuestion: CommentOnQuestionUseCase) {}
 
   @Post()
   @ApiOperation({
     summary: 'Answer a question',
-    operationId: 'answerQuestion',
+    operationId: 'commentOnQuestion',
   })
-  @ApiBody({ schema: zodToOpenAPI(answerQuestionBodySchema) })
+  @ApiBody({ schema: zodToOpenAPI(commentOnQuestionBodySchema) })
   @ApiCreatedResponse({ description: 'Question answered' })
   @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
   @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
   async handle(
     @Param('questionId', paramValidationPipe) questionId: QuestionIdRouterParam,
-    @Body(bodyValidationPipe) body: AnswerQuestionBody,
+    @Body(bodyValidationPipe) body: CommentOnQuestionBody,
     @CurrentUser() user: UserPayload,
   ) {
     const { content } = body;
     const { sub: userId } = user;
 
-    const result = await this.answerQuestion.execute({
+    const result = await this.commentOnQuestion.execute({
       content,
       questionId,
       authorId: userId,
-      attachmentsIds: [],
     });
 
     if (result.isLeft()) {

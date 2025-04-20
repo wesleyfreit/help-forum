@@ -22,12 +22,12 @@ import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 import { StudentPresenter } from '../presenters/student-presenter';
 
-export const authenticateBodySchema = z.object({
+const authenticateBodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
 
-export type AuthenticateBody = z.infer<typeof authenticateBodySchema>;
+type AuthenticateBody = z.infer<typeof authenticateBodySchema>;
 
 const bodyValidationPipe = new ZodValidationPipe(authenticateBodySchema);
 
