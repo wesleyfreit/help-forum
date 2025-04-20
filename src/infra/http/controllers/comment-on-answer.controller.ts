@@ -1,6 +1,6 @@
 import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
 import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
-import { CommentOnQuestionUseCase } from '@/domain/forum/application/use-cases/comment-on-question';
+import { CommentOnAnswerUseCase } from '@/domain/forum/application/use-cases/comment-on-answer';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
 import { BadRequestException, Body, Controller, Param, Post } from '@nestjs/common';
@@ -17,47 +17,47 @@ import {
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
 
-const commentOnQuestionParamSchema = z.string().uuid();
+const commentOnAnswerParamSchema = z.string().uuid();
 
-const paramValidationPipe = new ZodValidationPipe(commentOnQuestionParamSchema);
+const paramValidationPipe = new ZodValidationPipe(commentOnAnswerParamSchema);
 
-type QuestionIdRouterParam = z.infer<typeof commentOnQuestionParamSchema>;
+type AnswerIdRouterParam = z.infer<typeof commentOnAnswerParamSchema>;
 
-const commentOnQuestionBodySchema = z.object({
+const commentOnAnswerBodySchema = z.object({
   content: z.string(),
 });
 
-type CommentOnQuestionBody = z.infer<typeof commentOnQuestionBodySchema>;
+type CommentOnAnswerBody = z.infer<typeof commentOnAnswerBodySchema>;
 
-const bodyValidationPipe = new ZodValidationPipe(commentOnQuestionBodySchema);
+const bodyValidationPipe = new ZodValidationPipe(commentOnAnswerBodySchema);
 
 @ApiTags('Comments')
 @ApiBearerAuth()
-@Controller('/questions/:questionId/comments')
-export class CommentOnQuestionController {
-  constructor(private commentOnQuestion: CommentOnQuestionUseCase) {}
+@Controller('/answers/:answerId/comments')
+export class CommentOnAnswerController {
+  constructor(private commentOnAnswer: CommentOnAnswerUseCase) {}
 
   @Post()
   @ApiOperation({
-    summary: 'Comment a question',
-    operationId: 'commentOnQuestion',
+    summary: 'Comment an answer',
+    operationId: 'commentOnAnswer',
   })
-  @ApiBody({ schema: zodToOpenAPI(commentOnQuestionBodySchema) })
-  @ApiCreatedResponse({ description: 'Question commented' })
+  @ApiBody({ schema: zodToOpenAPI(commentOnAnswerBodySchema) })
+  @ApiCreatedResponse({ description: 'Answer commented' })
   @ApiBadRequestResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[400]) })
   @ApiUnauthorizedResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[401]) })
   @ApiNotFoundResponse({ schema: zodToOpenAPI(httpValidationErrorSchema[404]) })
   async handle(
-    @Param('questionId', paramValidationPipe) questionId: QuestionIdRouterParam,
-    @Body(bodyValidationPipe) body: CommentOnQuestionBody,
+    @Param('answerId', paramValidationPipe) answerId: AnswerIdRouterParam,
+    @Body(bodyValidationPipe) body: CommentOnAnswerBody,
     @CurrentUser() user: UserPayload,
   ) {
     const { content } = body;
     const { sub: userId } = user;
 
-    const result = await this.commentOnQuestion.execute({
+    const result = await this.commentOnAnswer.execute({
       content,
-      questionId,
+      answerId,
       authorId: userId,
     });
 

@@ -1,8 +1,10 @@
-import { Either, right } from '@/core/either';
+import { Either, left, right } from '@/core/either';
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
 import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
+import { Injectable } from '@nestjs/common';
 import { Question } from '../../enterprise/entities/question';
 import { QuestionsRepository } from '../repositories/questions-repository';
-import { Injectable } from '@nestjs/common';
 
 interface ChooseQuestionBestAnswerUseCaseRequest {
   answerId: string;
@@ -10,7 +12,7 @@ interface ChooseQuestionBestAnswerUseCaseRequest {
 }
 
 type ChooseQuestionBestAnswerUseCaseResponse = Either<
-  null,
+  ResourceNotFoundError | NotAllowedError,
   {
     question: Question;
   }
@@ -30,7 +32,7 @@ export class ChooseQuestionBestAnswerUseCase {
     const answer = await this.answersRepository.findById(answerId);
 
     if (!answer) {
-      throw new Error('Answer not found');
+      return left(new ResourceNotFoundError());
     }
 
     const question = await this.questionsRepository.findById(
@@ -38,11 +40,11 @@ export class ChooseQuestionBestAnswerUseCase {
     );
 
     if (!question) {
-      throw new Error('Question not found');
+      return left(new ResourceNotFoundError());
     }
 
     if (authorId !== question.authorId.toString()) {
-      throw new Error('Not allowed');
+      return left(new NotAllowedError());
     }
 
     question.bestAnswerId = answer.id;

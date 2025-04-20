@@ -1,8 +1,18 @@
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
+import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error';
 import { httpValidationErrorSchema } from '@/core/errors/validation/http-validation-error-schema';
 import { ChooseQuestionBestAnswerUseCase } from '@/domain/forum/application/use-cases/choose-question-best-answer';
 import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
-import { BadRequestException, Controller, HttpCode, Param, Patch } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  ForbiddenException,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -58,7 +68,16 @@ export class ChooseQuestionBestAnswerController {
     });
 
     if (result.isLeft()) {
-      throw new BadRequestException();
+      const error = result.value;
+
+      switch (error.constructor) {
+        case ResourceNotFoundError:
+          throw new NotFoundException(error.message);
+        case NotAllowedError:
+          throw new ForbiddenException(error.message);
+        default:
+          throw new BadRequestException();
+      }
     }
   }
 }
