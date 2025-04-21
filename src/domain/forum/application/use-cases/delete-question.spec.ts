@@ -4,12 +4,17 @@ import { type Question } from '@/domain/forum/enterprise/entities/question';
 import { randomUUID } from 'node:crypto';
 import { makeQuestion } from 'test/factories/make-question';
 import { makeQuestionAttachment } from 'test/factories/make-question-attachment';
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository';
 import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { DeleteQuestionUseCase } from './delete-question';
 
 let questionsRepository: InMemoryQuestionsRepository;
 let questionAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
+let attchmentsRepository: InMemoryAttachmentsRepository;
+let studentsRepository: InMemoryStudentsRepository;
+
 let sut: DeleteQuestionUseCase;
 
 let newQuestion: Question;
@@ -17,7 +22,13 @@ let newQuestion: Question;
 describe('Delete Question Use Case', () => {
   beforeEach(async () => {
     questionAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
-    questionsRepository = new InMemoryQuestionsRepository(questionAttachmentsRepository);
+    attchmentsRepository = new InMemoryAttachmentsRepository();
+    studentsRepository = new InMemoryStudentsRepository();
+    questionsRepository = new InMemoryQuestionsRepository(
+      attchmentsRepository,
+      questionAttachmentsRepository,
+      studentsRepository,
+    );
     sut = new DeleteQuestionUseCase(questionsRepository);
 
     newQuestion = makeQuestion();

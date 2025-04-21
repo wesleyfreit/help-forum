@@ -36,7 +36,11 @@ describe('On Answer Created', () => {
     );
 
     questionsAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
-    questionsRepository = new InMemoryQuestionsRepository(questionsAttachmentsRepository);
+    questionsRepository = new InMemoryQuestionsRepository(
+      attachmentsRepository,
+      questionsAttachmentsRepository,
+      studentsRepository,
+    );
 
     notificationsRepository = new InMemoryNotificationsRepository();
 

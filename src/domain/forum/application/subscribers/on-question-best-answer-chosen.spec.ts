@@ -35,7 +35,11 @@ describe('On Question Best Answer Chosen', () => {
       studentsRepository,
     );
     questionsAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
-    questionsRepository = new InMemoryQuestionsRepository(questionsAttachmentsRepository);
+    questionsRepository = new InMemoryQuestionsRepository(
+      attachmentsRepository,
+      questionsAttachmentsRepository,
+      studentsRepository,
+    );
 
     notificationsRepository = new InMemoryNotificationsRepository();
 

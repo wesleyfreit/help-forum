@@ -28,7 +28,11 @@ describe('Choose Question Best Answer Use Case', () => {
     answerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
     attachmentsRepository = new InMemoryAttachmentsRepository();
     studentsRepository = new InMemoryStudentsRepository();
-    questionsRepository = new InMemoryQuestionsRepository(questionAttachmentsRepository);
+    questionsRepository = new InMemoryQuestionsRepository(
+      attachmentsRepository,
+      questionAttachmentsRepository,
+      studentsRepository,
+    );
     answersRepository = new InMemoryAnswersRepository(
       attachmentsRepository,
       answerAttachmentsRepository,

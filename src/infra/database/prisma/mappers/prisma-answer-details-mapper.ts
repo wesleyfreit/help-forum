@@ -7,13 +7,13 @@ import {
 } from '@prisma/client';
 import { PrismaAttachmentMapper } from './prisma-attachment-mapper';
 
-type PrismaAnswerWithAuthor = PrismaAnswer & {
+type PrismaAnswerDetails = PrismaAnswer & {
   author: PrismaUser;
   attachments: PrismaAttachment[];
 };
 
-export class PrismaAnswerWithAuthorMapper {
-  static toDomain(raw: PrismaAnswerWithAuthor): AnswerDetails {
+export class PrismaAnswerDetailsMapper {
+  static toDomain(raw: PrismaAnswerDetails): AnswerDetails {
     return AnswerDetails.create({
       answerId: new UniqueEntityID(raw.id),
       content: raw.content,

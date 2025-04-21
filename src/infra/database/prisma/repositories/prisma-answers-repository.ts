@@ -5,7 +5,7 @@ import { Answer } from '@/domain/forum/enterprise/entities/answer';
 import { AnswerDetails } from '@/domain/forum/enterprise/entities/value-objects/answer-details';
 import { Injectable } from '@nestjs/common';
 import { PrismaAnswerMapper } from '../mappers/prisma-answer-mapper';
-import { PrismaAnswerWithAuthorMapper } from '../mappers/prisma-answer-with-author-mapper';
+import { PrismaAnswerDetailsMapper } from '../mappers/prisma-answer-details-mapper';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -52,7 +52,7 @@ export class PrismaAnswersRepository implements AnswersRepository {
       skip: (page - 1) * 20,
     });
 
-    return answers.map((answer) => PrismaAnswerWithAuthorMapper.toDomain(answer));
+    return answers.map((answer) => PrismaAnswerDetailsMapper.toDomain(answer));
   }
 
   async create(answer: Answer): Promise<void> {

@@ -5,7 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { Server } from 'node:net';
 import request from 'supertest';
+import { AttachmentFactory } from 'test/factories/make-attachment';
 import { QuestionFactory } from 'test/factories/make-question';
+import { QuestionAttachmentFactory } from 'test/factories/make-question-attachment';
 import { StudentFactory } from 'test/factories/make-student';
 
 describe('Get question by slug (E2E)', () => {
@@ -13,11 +15,18 @@ describe('Get question by slug (E2E)', () => {
   let jwt: JwtService;
   let studentFactory: StudentFactory;
   let questionFactory: QuestionFactory;
+  let attachmentFactory: AttachmentFactory;
+  let questionAttachmentsFactory: QuestionAttachmentFactory;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [StudentFactory, QuestionFactory],
+      providers: [
+        StudentFactory,
+        QuestionFactory,
+        AttachmentFactory,
+        QuestionAttachmentFactory,
+      ],
     }).compile();
 
     app = moduleRef.createNestApplication();
@@ -25,6 +34,8 @@ describe('Get question by slug (E2E)', () => {
     jwt = app.get(JwtService);
     studentFactory = app.get(StudentFactory);
     questionFactory = app.get(QuestionFactory);
+    attachmentFactory = app.get(AttachmentFactory);
+    questionAttachmentsFactory = app.get(QuestionAttachmentFactory);
 
     await app.init();
   });
@@ -34,12 +45,23 @@ describe('Get question by slug (E2E)', () => {
   });
 
   test('[GET] /questions/:slug', async () => {
-    const user = await studentFactory.makePrismaStudent();
+    const user = await studentFactory.makePrismaStudent({
+      name: 'John Doe',
+    });
 
     const accessToken = jwt.sign({}, { subject: user.id.toString() });
 
     const question = await questionFactory.makePrismaQuestion({
       authorId: user.id,
+    });
+
+    const attachment = await attachmentFactory.makePrismaAttachment({
+      title: 'Some attachment',
+    });
+
+    await questionAttachmentsFactory.makePrismaQuestionAttachment({
+      questionId: question.id,
+      attachmentId: attachment.id,
     });
 
     const response = await request(app.getHttpServer())
@@ -51,7 +73,15 @@ describe('Get question by slug (E2E)', () => {
 
     expect(response.body).toEqual(
       expect.objectContaining({
-        question: expect.objectContaining({ slug: question.slug.value }),
+        question: expect.objectContaining({
+          slug: question.slug.value,
+          author: expect.objectContaining({ name: 'John Doe' }),
+          attachments: expect.arrayContaining([
+            expect.objectContaining({
+              title: 'Some attachment',
+            }),
+          ]),
+        }),
       }),
     );
   });

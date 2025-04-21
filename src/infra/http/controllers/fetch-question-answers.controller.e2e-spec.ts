@@ -99,8 +99,6 @@ describe('Fetch question answers (E2E)', () => {
 
     expect(response.statusCode).toBe(200);
 
-    console.log(response.body);
-
     expect(response.body).toEqual(
       expect.objectContaining({
         answers: expect.arrayContaining([

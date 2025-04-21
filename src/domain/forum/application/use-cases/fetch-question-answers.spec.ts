@@ -85,8 +85,6 @@ describe('Fetch Question Answers Use Case', () => {
 
     expect(result.value?.questionAnswers).toHaveLength(3);
 
-    console.log(result.value?.questionAnswers[0].attachments);
-
     expect(result.value?.questionAnswers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

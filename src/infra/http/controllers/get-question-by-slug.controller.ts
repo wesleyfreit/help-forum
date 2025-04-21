@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import z from 'zod';
-import { QuestionPresenter } from '../presenters/question-presenter';
+import { QuestionDetailsPresenter } from '../presenters/question-details-presenter';
 
 const getQuestionBySlugParamSchema = z.string().min(1);
 
@@ -33,7 +33,20 @@ const getQuestionBlySlugResponseSchema = z.object({
     id: z.string().uuid(),
     title: z.string(),
     slug: z.string(),
-    bestAnswerId: z.string().uuid().nullable(),
+    bestAnswerId: z.string().uuid().nullish(),
+    content: z.string(),
+    author: z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+    }),
+    attachments: z.array(
+      z.object({
+        id: z.string().uuid(),
+        url: z.string().url(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+      }),
+    ),
     createdAt: z.date(),
     updatedAt: z.date(),
   }),
@@ -75,7 +88,7 @@ export class GetQuestionBySlugController {
     }
 
     return {
-      question: QuestionPresenter.toHTTP(result.value.question),
+      question: QuestionDetailsPresenter.toHTTP(result.value.question),
     };
   }
 }
