@@ -2,17 +2,22 @@ import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
 import { randomUUID } from 'node:crypto';
 import { makeQuestionComment } from 'test/factories/make-question-comment';
 import { InMemoryQuestionCommentsRepository } from 'test/repositories/in-memory-question-comments-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { QuestionComment } from '../../enterprise/entities/question-comment';
 import { DeleteQuestionCommentUseCase } from './delete-question-comment';
 
 let questionCommentsRepository: InMemoryQuestionCommentsRepository;
+let studentsRepository: InMemoryStudentsRepository;
 let sut: DeleteQuestionCommentUseCase;
 
 let newQuestionComment: QuestionComment;
 
 describe('Delete Question Comment Use Case', () => {
   beforeEach(async () => {
-    questionCommentsRepository = new InMemoryQuestionCommentsRepository();
+    studentsRepository = new InMemoryStudentsRepository();
+    questionCommentsRepository = new InMemoryQuestionCommentsRepository(
+      studentsRepository,
+    );
     sut = new DeleteQuestionCommentUseCase(questionCommentsRepository);
 
     newQuestionComment = makeQuestionComment();

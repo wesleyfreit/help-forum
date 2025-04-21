@@ -37,7 +37,9 @@ describe('Fetch question comments (E2E)', () => {
   });
 
   test('[GET] /questions/:questionId/comments', async () => {
-    const user = await studentFactory.makePrismaStudent();
+    const user = await studentFactory.makePrismaStudent({
+      name: 'John Doe',
+    });
 
     const accessToken = jwt.sign({}, { subject: user.id.toString() });
 
@@ -68,8 +70,14 @@ describe('Fetch question comments (E2E)', () => {
     expect(response.body).toEqual(
       expect.objectContaining({
         comments: expect.arrayContaining([
-          expect.objectContaining({ content: 'new comment' }),
-          expect.objectContaining({ content: 'another comment' }),
+          expect.objectContaining({
+            content: 'new comment',
+            author: expect.objectContaining({ name: 'John Doe' }),
+          }),
+          expect.objectContaining({
+            content: 'another comment',
+            author: expect.objectContaining({ name: 'John Doe' }),
+          }),
         ]),
       }),
     );

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/swagger';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
-import { CommentPresenter } from '../presenters/comment-presenter';
+import { CommentWithAuthorPresenter } from '../presenters/comment-with-author-presenter';
 
 const fetchAnswerCommentsParamSchema = z.string().uuid();
 
@@ -92,8 +92,8 @@ export class FetchAnswerCommentsController {
     }
 
     return {
-      comments: result.value.answerComments.map((answer) =>
-        CommentPresenter.toHTTP(answer),
+      comments: result.value.comments.map((answer) =>
+        CommentWithAuthorPresenter.toHTTP(answer),
       ),
     };
   }
