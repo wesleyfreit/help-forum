@@ -24,4 +24,9 @@ export const httpValidationErrorSchema = {
       error: z.string().default('Conflict'),
       statusCode: z.number().default(409),
     }),
+  415: z.object({
+    error: z.string().default('Unsupported Media Type'),
+    message: z.string().default('File type "{type}" is not valid'),
+    statusCode: z.number().default(415),
+  }),
 } as const;

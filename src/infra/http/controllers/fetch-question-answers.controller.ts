@@ -32,15 +32,24 @@ const queryValidationPipe = new ZodValidationPipe(fetchQuestionAnswersQuerySchem
 type PageQueryParam = z.infer<typeof fetchQuestionAnswersQuerySchema>;
 
 const fetchQuestionAnswersResponseSchema = z.object({
-  questions: z.array(
+  answers: z.array(
     z.object({
       id: z.string().uuid(),
-      title: z.string(),
-      sçug: z.string(),
       content: z.string(),
+      author: z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+      }),
+      attachments: z.array(
+        z.object({
+          id: z.string().uuid(),
+          url: z.string().url(),
+          createdAt: z.date(),
+          updatedAt: z.date(),
+        }),
+      ),
       createdAt: z.date(),
       updatedAt: z.date(),
-      authorId: z.string().uuid(),
     }),
   ),
 });

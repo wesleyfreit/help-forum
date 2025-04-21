@@ -4,7 +4,7 @@ import { AttachmentPresenter } from './attachment-presenter';
 export class AnswerWithAuthorPresenter {
   static toHTTP(answer: AnswerWithAuthor) {
     return {
-      answerId: answer.answerId.toString(),
+      id: answer.answerId.toString(),
       content: answer.content,
       author: {
         id: answer.author.id.toString(),
