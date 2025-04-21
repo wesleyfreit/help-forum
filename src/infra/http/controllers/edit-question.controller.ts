@@ -38,7 +38,7 @@ type QuestionIdRouterParam = z.infer<typeof editQuestionParamSchema>;
 const editQuestionBodySchema = z.object({
   title: z.string(),
   content: z.string(),
-  attachments: z.array(z.string().uuid()),
+  attachments: z.array(z.string().uuid()).optional(),
 });
 
 type EditQuestionBody = z.infer<typeof editQuestionBodySchema>;
@@ -82,7 +82,7 @@ export class EditQuestionController {
       title,
       content,
       authorId: userId,
-      attachmentsIds: attachments,
+      attachmentsIds: attachments ?? [],
     });
 
     if (result.isLeft()) {

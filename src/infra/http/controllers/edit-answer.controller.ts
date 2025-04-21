@@ -37,6 +37,7 @@ type AnswerIdRouterParam = z.infer<typeof editAnswerParamSchema>;
 
 const editAnswerBodySchema = z.object({
   content: z.string(),
+  attachments: z.array(z.string().uuid()).optional(),
 });
 
 type EditAnswerBody = z.infer<typeof editAnswerBodySchema>;
@@ -72,14 +73,14 @@ export class EditAnswerController {
     @Body(bodyValidationPipe) body: EditAnswerBody,
     @CurrentUser() user: UserPayload,
   ) {
-    const { content } = body;
+    const { content, attachments } = body;
     const { sub: userId } = user;
 
     const result = await this.editAnswer.execute({
       answerId,
       content,
       authorId: userId,
-      attachmentsIds: [],
+      attachmentsIds: attachments ?? [],
     });
 
     if (result.isLeft()) {

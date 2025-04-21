@@ -23,6 +23,7 @@ type QuestionIdRouterParam = z.infer<typeof answerQuestionParamSchema>;
 
 const answerQuestionBodySchema = z.object({
   content: z.string(),
+  attachments: z.array(z.string().uuid()).optional(),
 });
 
 type AnswerQuestionBody = z.infer<typeof answerQuestionBodySchema>;
@@ -49,14 +50,14 @@ export class AnswerQuestionController {
     @Body(bodyValidationPipe) body: AnswerQuestionBody,
     @CurrentUser() user: UserPayload,
   ) {
-    const { content } = body;
+    const { content, attachments } = body;
     const { sub: userId } = user;
 
     const result = await this.answerQuestion.execute({
       content,
       questionId,
       authorId: userId,
-      attachmentsIds: [],
+      attachmentsIds: attachments ?? [],
     });
 
     if (result.isLeft()) {
