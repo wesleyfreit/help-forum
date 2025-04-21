@@ -24,19 +24,6 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
   async save(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question);
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.question.update({
-        where: { id: data.id },
-        data,
-      });
-      await this.questionAttachmentsRepository.createMany(
-        question.attachments.getNewItems(),
-      );
-      await this.questionAttachmentsRepository.deleteMany(
-        question.attachments.getRemovedItems(),
-      );
-    });
-
     await Promise.all([
       this.prisma.question.update({
         where: {
