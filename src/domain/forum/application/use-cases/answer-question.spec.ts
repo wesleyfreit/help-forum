@@ -18,7 +18,7 @@ describe('Answer Question Use Case', () => {
 
   it('should be able to create an answer', async () => {
     const result = await sut.execute({
-      instructorId: randomUUID(),
+      authorId: randomUUID(),
       questionId: randomUUID(),
       content: faker.lorem.text(),
       attachmentsIds: ['1', '2'],
@@ -32,5 +32,23 @@ describe('Answer Question Use Case', () => {
       expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
       expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
     ]);
+  });
+
+  it('should persist attachments when answering a question', async () => {
+    const result = await sut.execute({
+      questionId: randomUUID(),
+      authorId: randomUUID(),
+      content: faker.lorem.text(),
+      attachmentsIds: ['1', '2'],
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(answerAttachmentsRepository.items).toHaveLength(2);
+    expect(answerAttachmentsRepository.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityID('2') }),
+      ]),
+    );
   });
 });

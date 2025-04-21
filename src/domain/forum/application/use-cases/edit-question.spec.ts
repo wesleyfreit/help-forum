@@ -74,15 +74,12 @@ describe('Edit Question Use Case', () => {
   });
 
   it('should sync new and removed attachments when editing a question', async () => {
-    const title = faker.lorem.sentence();
-    const content = faker.lorem.text();
-
     const result = await sut.execute({
       authorId: newQuestion.authorId.toString(),
       questionId: newQuestion.id.toString(),
       attachmentsIds: ['1', '3'],
-      title,
-      content,
+      title: faker.lorem.sentence(),
+      content: faker.lorem.text(),
     });
 
     expect(result.isRight()).toBe(true);
