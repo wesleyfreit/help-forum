@@ -18,7 +18,7 @@ import { z } from 'zod';
 const createQuestionBodySchema = z.object({
   title: z.string(),
   content: z.string(),
-  attachments: z.array(z.string().uuid()).optional(),
+  attachments: z.array(z.string().uuid()).default([]),
 });
 
 type CreateQuestionBody = z.infer<typeof createQuestionBodySchema>;
@@ -51,7 +51,7 @@ export class CreateQuestionController {
       title,
       content,
       authorId: userId,
-      attachmentsIds: attachments ?? [],
+      attachmentsIds: attachments,
     });
 
     if (result.isLeft()) {

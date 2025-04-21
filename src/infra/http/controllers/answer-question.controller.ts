@@ -23,7 +23,7 @@ type QuestionIdRouterParam = z.infer<typeof answerQuestionParamSchema>;
 
 const answerQuestionBodySchema = z.object({
   content: z.string(),
-  attachments: z.array(z.string().uuid()).optional(),
+  attachments: z.array(z.string().uuid()).default([]),
 });
 
 type AnswerQuestionBody = z.infer<typeof answerQuestionBodySchema>;
@@ -57,7 +57,7 @@ export class AnswerQuestionController {
       content,
       questionId,
       authorId: userId,
-      attachmentsIds: attachments ?? [],
+      attachmentsIds: attachments,
     });
 
     if (result.isLeft()) {
