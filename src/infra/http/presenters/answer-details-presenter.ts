@@ -1,10 +1,10 @@
-import { AnswerWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/answer-with-author';
+import { AnswerDetails } from '@/domain/forum/enterprise/entities/value-objects/answer-details';
 import { AttachmentPresenter } from './attachment-presenter';
 
-export class AnswerWithAuthorPresenter {
-  static toHTTP(answer: AnswerWithAuthor) {
+export class AnswerDetailsPresenter {
+  static toHTTP(answer: AnswerDetails) {
     return {
-      id: answer.answerId.toString(),
+      answerId: answer.answerId.toString(),
       content: answer.content,
       author: {
         id: answer.author.id.toString(),

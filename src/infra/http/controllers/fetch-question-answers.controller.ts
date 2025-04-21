@@ -13,7 +13,7 @@ import {
 } from '@nestjs/swagger';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
-import { AnswerWithAuthorPresenter } from '../presenters/answer-with-author-repsenter';
+import { AnswerDetailsPresenter } from '../presenters/answer-details-presenter';
 
 const fetchQuestionAnswersParamSchema = z.string().uuid();
 
@@ -34,7 +34,7 @@ type PageQueryParam = z.infer<typeof fetchQuestionAnswersQuerySchema>;
 const fetchQuestionAnswersResponseSchema = z.object({
   answers: z.array(
     z.object({
-      id: z.string().uuid(),
+      answerId: z.string().uuid(),
       content: z.string(),
       author: z.object({
         id: z.string().uuid(),
@@ -102,7 +102,7 @@ export class FetchQuestionAnswersController {
 
     return {
       answers: result.value.questionAnswers.map((answer) =>
-        AnswerWithAuthorPresenter.toHTTP(answer),
+        AnswerDetailsPresenter.toHTTP(answer),
       ),
     };
   }

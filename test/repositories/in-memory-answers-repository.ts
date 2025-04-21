@@ -2,7 +2,7 @@ import { DomainEvents } from '@/core/events/domain-events';
 import { PaginationParams } from '@/core/repositories/pagination-params';
 import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
 import { Answer } from '@/domain/forum/enterprise/entities/answer';
-import { AnswerWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/answer-with-author';
+import { AnswerDetails } from '@/domain/forum/enterprise/entities/value-objects/answer-details';
 import { InMemoryAnswerAttachmentsRepository } from './in-memory-answer-attachments-repository';
 import { InMemoryAttachmentsRepository } from './in-memory-attachments-repository';
 import { InMemoryStudentsRepository } from './in-memory-students-repository';
@@ -34,7 +34,7 @@ export class InMemoryAnswersRepository implements AnswersRepository {
     return questionAnswers;
   }
 
-  async findManyByQuestionIdWithAuthor(questionId: string, { page }: PaginationParams) {
+  async findManyByQuestionIdWithDetails(questionId: string, { page }: PaginationParams) {
     const questionAnswers = this.items
       .filter((item) => item.questionId.toString() === questionId)
       .slice((page - 1) * 20, page * 20)
@@ -65,7 +65,7 @@ export class InMemoryAnswersRepository implements AnswersRepository {
           return attachment;
         });
 
-        return AnswerWithAuthor.create({
+        return AnswerDetails.create({
           answerId: answer.id,
           content: answer.content,
           createdAt: answer.createdAt,

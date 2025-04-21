@@ -10,7 +10,7 @@ export abstract class QuestionCommentsRepository {
     questionId: string,
     params: PaginationParams,
   ): Promise<QuestionComment[]>;
-  abstract findManyByQuestionIdWithAuthor(
+  abstract findManyByQuestionIdWithDetails(
     questionId: string,
     params: PaginationParams,
   ): Promise<CommentWithAuthor[]>;

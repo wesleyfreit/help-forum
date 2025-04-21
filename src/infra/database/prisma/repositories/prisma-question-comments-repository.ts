@@ -60,7 +60,7 @@ export class PrismaQuestionCommentsRepository implements QuestionCommentsReposit
     );
   }
 
-  async findManyByQuestionIdWithAuthor(
+  async findManyByQuestionIdWithDetails(
     questionId: string,
     { page }: PaginationParams,
   ): Promise<CommentWithAuthor[]> {

@@ -1,6 +1,6 @@
 import { PaginationParams } from '@/core/repositories/pagination-params';
 import { Answer } from '@/domain/forum/enterprise/entities/answer';
-import { AnswerWithAuthor } from '../../enterprise/entities/value-objects/answer-with-author';
+import { AnswerDetails } from '../../enterprise/entities/value-objects/answer-details';
 
 export abstract class AnswersRepository {
   abstract create(answer: Answer): Promise<void>;
@@ -11,8 +11,8 @@ export abstract class AnswersRepository {
     questionId: string,
     params: PaginationParams,
   ): Promise<Answer[]>;
-  abstract findManyByQuestionIdWithAuthor(
+  abstract findManyByQuestionIdWithDetails(
     questionId: string,
     params: PaginationParams,
-  ): Promise<AnswerWithAuthor[]>;
+  ): Promise<AnswerDetails[]>;
 }

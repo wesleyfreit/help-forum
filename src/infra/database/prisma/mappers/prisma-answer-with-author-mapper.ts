@@ -1,5 +1,5 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id';
-import { AnswerWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/answer-with-author';
+import { AnswerDetails } from '@/domain/forum/enterprise/entities/value-objects/answer-details';
 import {
   Answer as PrismaAnswer,
   Attachment as PrismaAttachment,
@@ -13,8 +13,8 @@ type PrismaAnswerWithAuthor = PrismaAnswer & {
 };
 
 export class PrismaAnswerWithAuthorMapper {
-  static toDomain(raw: PrismaAnswerWithAuthor): AnswerWithAuthor {
-    return AnswerWithAuthor.create({
+  static toDomain(raw: PrismaAnswerWithAuthor): AnswerDetails {
+    return AnswerDetails.create({
       answerId: new UniqueEntityID(raw.id),
       content: raw.content,
       author: {

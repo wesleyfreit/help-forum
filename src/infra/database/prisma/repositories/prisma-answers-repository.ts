@@ -2,7 +2,7 @@ import { PaginationParams } from '@/core/repositories/pagination-params';
 import { AnswerAttachmentsRepository } from '@/domain/forum/application/repositories/answer-attachments-repository';
 import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
 import { Answer } from '@/domain/forum/enterprise/entities/answer';
-import { AnswerWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/answer-with-author';
+import { AnswerDetails } from '@/domain/forum/enterprise/entities/value-objects/answer-details';
 import { Injectable } from '@nestjs/common';
 import { PrismaAnswerMapper } from '../mappers/prisma-answer-mapper';
 import { PrismaAnswerWithAuthorMapper } from '../mappers/prisma-answer-with-author-mapper';
@@ -33,10 +33,10 @@ export class PrismaAnswersRepository implements AnswersRepository {
     return answers.map((answer) => PrismaAnswerMapper.toDomain(answer));
   }
 
-  async findManyByQuestionIdWithAuthor(
+  async findManyByQuestionIdWithDetails(
     questionId: string,
     { page }: PaginationParams,
-  ): Promise<AnswerWithAuthor[]> {
+  ): Promise<AnswerDetails[]> {
     const answers = await this.prisma.answer.findMany({
       where: {
         questionId,
