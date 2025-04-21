@@ -4,13 +4,17 @@ import { makeAnswer } from 'test/factories/make-answer';
 import { makeQuestion } from 'test/factories/make-question';
 import { InMemoryAnswerAttachmentsRepository } from 'test/repositories/in-memory-answer-attachments-repository';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository';
 import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { Answer } from '../../enterprise/entities/answer';
 import { ChooseQuestionBestAnswerUseCase } from './choose-question-best-answer';
 
 let questionAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
 let answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository;
+let studentsRepository: InMemoryStudentsRepository;
+let attachmentsRepository: InMemoryAttachmentsRepository;
 let questionsRepository: InMemoryQuestionsRepository;
 let answersRepository: InMemoryAnswersRepository;
 let sut: ChooseQuestionBestAnswerUseCase;
@@ -22,8 +26,14 @@ describe('Choose Question Best Answer Use Case', () => {
   beforeEach(async () => {
     questionAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
     answerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
+    attachmentsRepository = new InMemoryAttachmentsRepository();
+    studentsRepository = new InMemoryStudentsRepository();
     questionsRepository = new InMemoryQuestionsRepository(questionAttachmentsRepository);
-    answersRepository = new InMemoryAnswersRepository(answerAttachmentsRepository);
+    answersRepository = new InMemoryAnswersRepository(
+      attachmentsRepository,
+      answerAttachmentsRepository,
+      studentsRepository,
+    );
     sut = new ChooseQuestionBestAnswerUseCase(questionsRepository, answersRepository);
 
     newQuestion = makeQuestion();

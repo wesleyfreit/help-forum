@@ -7,10 +7,14 @@ import { makeAnswer } from 'test/factories/make-answer';
 import { makeAnswerAttachment } from 'test/factories/make-answer-attachment';
 import { InMemoryAnswerAttachmentsRepository } from 'test/repositories/in-memory-answer-attachments-repository';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { EditAnswerUseCase } from './edit-answer';
 
 let answersRepository: InMemoryAnswersRepository;
 let answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository;
+let attachmentsRepository: InMemoryAttachmentsRepository;
+let studentsRepository: InMemoryStudentsRepository;
 let sut: EditAnswerUseCase;
 
 let newAnswer: Answer;
@@ -18,7 +22,13 @@ let newAnswer: Answer;
 describe('Edit Answer Use Case', () => {
   beforeEach(async () => {
     answerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
-    answersRepository = new InMemoryAnswersRepository(answerAttachmentsRepository);
+    attachmentsRepository = new InMemoryAttachmentsRepository();
+    studentsRepository = new InMemoryStudentsRepository();
+    answersRepository = new InMemoryAnswersRepository(
+      attachmentsRepository,
+      answerAttachmentsRepository,
+      studentsRepository,
+    );
     sut = new EditAnswerUseCase(answersRepository, answerAttachmentsRepository);
 
     newAnswer = makeAnswer();

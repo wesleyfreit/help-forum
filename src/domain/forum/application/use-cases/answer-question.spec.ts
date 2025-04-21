@@ -3,16 +3,26 @@ import { faker } from '@faker-js/faker';
 import { randomUUID } from 'node:crypto';
 import { InMemoryAnswerAttachmentsRepository } from 'test/repositories/in-memory-answer-attachments-repository';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { AnswerQuestionUseCase } from './answer-question';
 
 let answersRepository: InMemoryAnswersRepository;
+let studentsRepository: InMemoryStudentsRepository;
+let attachmentsRepository: InMemoryAttachmentsRepository;
 let answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository;
 let sut: AnswerQuestionUseCase;
 
 describe('Answer Question Use Case', () => {
   beforeEach(() => {
     answerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
-    answersRepository = new InMemoryAnswersRepository(answerAttachmentsRepository);
+    attachmentsRepository = new InMemoryAttachmentsRepository();
+    studentsRepository = new InMemoryStudentsRepository();
+    answersRepository = new InMemoryAnswersRepository(
+      attachmentsRepository,
+      answerAttachmentsRepository,
+      studentsRepository,
+    );
     sut = new AnswerQuestionUseCase(answersRepository);
   });
 

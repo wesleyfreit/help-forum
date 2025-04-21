@@ -3,17 +3,21 @@ import { makeAnswer } from 'test/factories/make-answer';
 import { makeQuestion } from 'test/factories/make-question';
 import { InMemoryAnswerAttachmentsRepository } from 'test/repositories/in-memory-answer-attachments-repository';
 import { InMemoryAnswersRepository } from 'test/repositories/in-memory-answers-repository';
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository';
 import { InMemoryNotificationsRepository } from 'test/repositories/in-memory-notifications-repository';
 import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { MockInstance } from 'vitest';
 import { OnQuestionBestAnswerChosen } from './on-question-best-answer-chosen';
 
-let inMemoryQuestionsRepository: InMemoryQuestionsRepository;
-let inMemoryAnswersRepository: InMemoryAnswersRepository;
-let inMemoryAnswerAttachmentsRepository: InMemoryAnswerAttachmentsRepository;
-let inMemoryQuestionsAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
-let inMemoryNotificationsRepository: InMemoryNotificationsRepository;
+let questionsRepository: InMemoryQuestionsRepository;
+let answersRepository: InMemoryAnswersRepository;
+let answerAttachmentsRepository: InMemoryAnswerAttachmentsRepository;
+let questionsAttachmentsRepository: InMemoryQuestionAttachmentsRepository;
+let notificationsRepository: InMemoryNotificationsRepository;
+let attachmentsRepository: InMemoryAttachmentsRepository;
+let studentsRepository: InMemoryStudentsRepository;
 
 let sut: SendNotificationUseCase;
 
@@ -21,23 +25,25 @@ let sendNotificationExecuteSpy: MockInstance;
 
 describe('On Question Best Answer Chosen', () => {
   beforeEach(() => {
-    inMemoryAnswerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
-    inMemoryAnswersRepository = new InMemoryAnswersRepository(
-      inMemoryAnswerAttachmentsRepository,
+    answerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
+    attachmentsRepository = new InMemoryAttachmentsRepository();
+    studentsRepository = new InMemoryStudentsRepository();
+
+    answersRepository = new InMemoryAnswersRepository(
+      attachmentsRepository,
+      answerAttachmentsRepository,
+      studentsRepository,
     );
+    questionsAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
+    questionsRepository = new InMemoryQuestionsRepository(questionsAttachmentsRepository);
 
-    inMemoryQuestionsAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
-    inMemoryQuestionsRepository = new InMemoryQuestionsRepository(
-      inMemoryQuestionsAttachmentsRepository,
-    );
+    notificationsRepository = new InMemoryNotificationsRepository();
 
-    inMemoryNotificationsRepository = new InMemoryNotificationsRepository();
-
-    sut = new SendNotificationUseCase(inMemoryNotificationsRepository);
+    sut = new SendNotificationUseCase(notificationsRepository);
 
     sendNotificationExecuteSpy = vi.spyOn(sut, 'execute');
 
-    new OnQuestionBestAnswerChosen(inMemoryAnswersRepository, sut);
+    new OnQuestionBestAnswerChosen(answersRepository, sut);
   });
 
   it('should send a notification when a question has new best answer chosen', async () => {
@@ -46,12 +52,12 @@ describe('On Question Best Answer Chosen', () => {
       questionId: question.id,
     });
 
-    await inMemoryQuestionsRepository.create(question);
-    await inMemoryAnswersRepository.create(answer);
+    await questionsRepository.create(question);
+    await answersRepository.create(answer);
 
     question.bestAnswerId = answer.id;
 
-    await inMemoryQuestionsRepository.save(question);
+    await questionsRepository.save(question);
 
     expect(sendNotificationExecuteSpy).toHaveBeenCalled();
   });

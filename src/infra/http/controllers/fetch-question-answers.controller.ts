@@ -13,7 +13,7 @@ import {
 } from '@nestjs/swagger';
 import { zodToOpenAPI, ZodValidationPipe } from 'nestjs-zod';
 import { z } from 'zod';
-import { AnswerPresenter } from '../presenters/answer-presenter';
+import { AnswerWithAuthorPresenter } from '../presenters/answer-with-author-repsenter';
 
 const fetchQuestionAnswersParamSchema = z.string().uuid();
 
@@ -93,7 +93,7 @@ export class FetchQuestionAnswersController {
 
     return {
       answers: result.value.questionAnswers.map((answer) =>
-        AnswerPresenter.toHTTP(answer),
+        AnswerWithAuthorPresenter.toHTTP(answer),
       ),
     };
   }
