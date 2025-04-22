@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EnvModule } from './env/env.module';
 import { EnvService } from './env/env.service';
+import { EventModule } from './events/events.module';
 import { HttpModule } from './http/http.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { HttpModule } from './http/http.module';
     AuthModule,
     EnvModule,
     HttpModule,
+    EventModule,
   ],
   providers: [EnvService],
 })

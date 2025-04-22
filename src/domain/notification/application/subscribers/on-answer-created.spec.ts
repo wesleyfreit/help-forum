@@ -9,7 +9,8 @@ import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memo
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
 import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { MockInstance } from 'vitest';
-import { OnQuestionBestAnswerChosen } from './on-question-best-answer-chosen';
+import { OnAnswerCreated } from './on-answer-created';
+import { waitFor } from 'test/utils/wait-on';
 
 let questionsRepository: InMemoryQuestionsRepository;
 let answersRepository: InMemoryAnswersRepository;
@@ -23,7 +24,7 @@ let sut: SendNotificationUseCase;
 
 let sendNotificationExecuteSpy: MockInstance;
 
-describe('On Question Best Answer Chosen', () => {
+describe('On Answer Created', () => {
   beforeEach(() => {
     answerAttachmentsRepository = new InMemoryAnswerAttachmentsRepository();
     attachmentsRepository = new InMemoryAttachmentsRepository();
@@ -34,6 +35,7 @@ describe('On Question Best Answer Chosen', () => {
       answerAttachmentsRepository,
       studentsRepository,
     );
+
     questionsAttachmentsRepository = new InMemoryQuestionAttachmentsRepository();
     questionsRepository = new InMemoryQuestionsRepository(
       attachmentsRepository,
@@ -47,10 +49,10 @@ describe('On Question Best Answer Chosen', () => {
 
     sendNotificationExecuteSpy = vi.spyOn(sut, 'execute');
 
-    new OnQuestionBestAnswerChosen(answersRepository, sut);
+    new OnAnswerCreated(questionsRepository, sut);
   });
 
-  it('should send a notification when a question has new best answer chosen', async () => {
+  it('should send a notification when an answer is created', async () => {
     const question = makeQuestion();
     const answer = makeAnswer({
       questionId: question.id,
@@ -59,10 +61,8 @@ describe('On Question Best Answer Chosen', () => {
     await questionsRepository.create(question);
     await answersRepository.create(answer);
 
-    question.bestAnswerId = answer.id;
-
-    await questionsRepository.save(question);
-
-    expect(sendNotificationExecuteSpy).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(sendNotificationExecuteSpy).toHaveBeenCalled();
+    });
   });
 });

@@ -1,3 +1,4 @@
+import { DomainEvents } from '@/core/events/domain-events';
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import { randomUUID } from 'crypto';
@@ -28,6 +29,8 @@ beforeAll(() => {
   process.env.DATABASE_URL = databaseURL;
 
   execSync('pnpm prisma migrate deploy');
+
+  DomainEvents.shouldRun = false;
 
   void createBucket();
 });
