@@ -12,6 +12,9 @@ export const envSchema = z.object({
   BUCKET_ACCESS_KEY_ID: z.string(),
   BUCKET_SECRET_ACCESS_KEY: z.string(),
   ORIGIN_URL: z.string().url(),
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.coerce.number(),
+  REDIS_DB: z.coerce.number().default(0),
 });
 
 export type Env = z.infer<typeof envSchema>;
