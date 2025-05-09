@@ -76,7 +76,9 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
     const cachedHit = await this.cache.get(`question:${slug}:details`);
 
     if (cachedHit) {
-      return JSON.parse(cachedHit) as QuestionDetails;
+      const cacheData: QuestionDetails = JSON.parse(cachedHit);
+
+      return cacheData;
     }
 
     const question = await this.prisma.question.findUnique({
